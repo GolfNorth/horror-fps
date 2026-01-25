@@ -1,0 +1,20 @@
+{
+    "name": "Game.Core",
+    "rootNamespace": "Game.Core",
+    "references": [
+        "VContainer",
+        "UniTask",
+        "MessagePipe",
+        "MessagePipe.VContainer",
+        "Game.Core.Events"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

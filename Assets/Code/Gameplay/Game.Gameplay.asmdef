@@ -1,0 +1,23 @@
+{
+    "name": "Game.Gameplay",
+    "rootNamespace": "Game.Gameplay",
+    "references": [
+        "Game.Core",
+        "Game.Core.Events",
+        "Game.Input",
+        "Game.Infrastructure",
+        "VContainer",
+        "UniTask",
+        "MessagePipe",
+        "MessagePipe.VContainer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

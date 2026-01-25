@@ -350,3 +350,173 @@ Claude Code should prioritize:
 - Explicit lifetimes
 - Minimal coupling
 - Predictable data flow
+
+---
+
+## Code Conventions
+
+### Using Directives
+
+- Place `using` directives **outside** the namespace declaration
+- Order: System namespaces first, then Unity, then third-party, then project namespaces
+
+```csharp
+using System;
+using UnityEngine;
+using VContainer;
+using Game.Core.Logging;
+
+namespace Game.MyModule
+{
+    // ...
+}
+```
+
+### Naming
+
+- Private fields: `_camelCase` with underscore prefix
+- Public properties: `PascalCase`
+- Local variables: `camelCase`
+- Constants: `PascalCase`
+
+### Logging
+
+Inject `ILogService` into services. Each service defines a `LogTag` constant for identification.
+Tags are automatically colorized in the Unity Console based on their hash.
+
+```csharp
+using Game.Core.Logging;
+
+public class MyService
+{
+    private const string LogTag = "MyService";
+    private readonly ILogService _log;
+
+    [Inject]
+    public MyService(ILogService log)
+    {
+        _log = log;
+    }
+
+    public void DoWork()
+    {
+        _log.Info(LogTag, "Working...");
+        _log.Verbose(LogTag, "Debug details");
+        _log.Warning(LogTag, "Something suspicious");
+        _log.Error(LogTag, "Something failed");
+    }
+}
+```
+
+**In static methods/bootstrappers** (where DI unavailable):
+Use `UnityEngine.Debug` directly with manual color formatting.
+
+**Log configuration** (`LogConfig` ScriptableObject):
+- `MinLevel` - minimum log level (Verbose, Info, Warning, Error, None)
+- `ColorizeTag` - enable/disable tag colorization
+- Create asset: Right-click → Create → Game → Core → Log Config
+- Add to `_configs` array in `ApplicationScope` prefab
+
+---
+
+## Current Implementation
+
+This section describes what is **already implemented** in the codebase.
+
+### Code Structure
+
+```
+Assets/Code/
+├── Core/                    # Game.Core.asmdef (namespace: Game.Core)
+│   ├── Bootstrap/           # GameBootstrapper, ApplicationScope
+│   ├── Configuration/       # GameConfig base class
+│   ├── Coroutines/          # ICoroutineRunner, CoroutineRunner
+│   ├── Interfaces/          # IGameService, IInitializableAsync
+│   ├── Logging/             # Log static class
+│   └── Time/                # IGameTime, GameTimeService
+├── Core.Events/             # Game.Core.Events.asmdef (namespace: Game.Core.Events)
+├── Infrastructure/          # Game.Infrastructure.asmdef (namespace: Game.Infrastructure)
+│   ├── Assets/              # IAssetLoader, AddressableAssetLoader
+│   └── SceneManagement/     # ISceneLoader, SceneLoader
+├── Input/                   # Game.Input.asmdef (namespace: Game.Input)
+└── Gameplay/                # Game.Gameplay.asmdef (namespace: Game.Gameplay)
+```
+
+### Assembly Dependencies
+
+```
+Game.Core.Events  ← (no game dependencies, only Unity.Mathematics)
+       ↑
+   Game.Core      ← VContainer, UniTask, MessagePipe, MessagePipe.VContainer
+       ↑
+Game.Infrastructure ← Game.Core, Unity.Addressables
+Game.Input          ← Game.Core, R3.Unity, Unity.InputSystem
+       ↑
+  Game.Gameplay     ← All above + MessagePipe.VContainer
+```
+
+### VContainer Setup
+
+**ApplicationScope** (`Assets/Code/Core/Bootstrap/ApplicationScope.cs`)
+- Root LifetimeScope, lives in DontDestroyOnLoad
+- `_configs` array for global GameConfig assets (auto-registered by type)
+- Registers MessagePipe and all event brokers
+- Registers singleton services: `ILogService`, `IGameTime`, `ICoroutineRunner`
+- Create prefab and reference in `VContainerSettings.asset` (Resources folder)
+
+**GameplayScope** (`Assets/Code/Gameplay/GameplayScope.cs`)
+- Scene-level LifetimeScope, child of ApplicationScope
+- `_configs` array for scene-specific GameConfig assets
+- Registers scoped services: `IAssetLoader`, `ISceneLoader`, `IPlayerInput`
+- Add to a GameObject in each gameplay scene
+
+### Implemented Services
+
+| Interface | Implementation | Scope | Module |
+|-----------|---------------|-------|--------|
+| `ILogService` | `UnityLogService` | Singleton | Core |
+| `IGameTime` | `GameTimeService` | Singleton | Core |
+| `ICoroutineRunner` | `CoroutineRunner` | Singleton | Core |
+| `IAssetLoader` | `AddressableAssetLoader` | Scoped | Infrastructure |
+| `ISceneLoader` | `SceneLoader` | Scoped | Infrastructure |
+| `IPlayerInput` | `PlayerInputService` | Scoped | Input |
+
+### MessagePipe Events
+
+Registered in `ApplicationScope`:
+- `GameStateChangedEvent`, `PauseStateChangedEvent`
+- `PlayerSpawnedEvent`, `PlayerDeathEvent`, `PlayerHealthChangedEvent`
+- `DamageDealtEvent`, `WeaponFiredEvent`, `WeaponReloadedEvent`
+- `UINavigationEvent`, `UIVisibilityChangedEvent`
+
+### Input System
+
+- Input actions defined in `Assets/InputSystem_Actions.inputactions`
+- Actions: Move, Look, Attack, Interact, Crouch, Jump, Previous, Next, Sprint
+- Wrapped by `PlayerInputService` exposing R3 observables
+
+### Configuration Base
+
+- `GameConfig` (`Assets/Code/Core/Configuration/GameConfig.cs`) - base ScriptableObject
+- Inherit from this for module-specific configs (e.g., `MovementConfig`, `WeaponConfig`)
+- Store assets in `Assets/Configuration/[Module]/` folder:
+
+```
+Assets/Configuration/
+├── Core/
+│   └── LogConfig.asset
+├── Player/
+│   ├── MovementConfig.asset
+│   └── CameraConfig.asset
+├── Combat/
+│   └── WeaponConfigs/
+└── AI/
+    └── EnemyConfigs/
+```
+
+### Adding New Systems
+
+1. **New service**: Create interface + implementation, register in appropriate Scope
+2. **New event**: Add struct to `Core.Events`, register broker in `ApplicationScope`
+3. **New module**: Create folder + `.asmdef`, reference only needed assemblies
+4. **New config**: Inherit from `GameConfig`, create asset, add to `_configs` array in Scope
