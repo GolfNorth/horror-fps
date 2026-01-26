@@ -1,16 +1,14 @@
 {
-    "name": "Game.Gameplay",
-    "rootNamespace": "Game.Gameplay",
+    "name": "Game.Player",
+    "rootNamespace": "Game.Player",
     "references": [
         "Game.Core",
         "Game.Core.Events",
         "Game.Input",
-        "Game.Infrastructure",
-        "Game.Player",
         "VContainer",
+        "R3.Unity",
         "UniTask",
-        "MessagePipe",
-        "MessagePipe.VContainer"
+        "Unity.Cinemachine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

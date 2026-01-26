@@ -45,16 +45,15 @@ Systems are expected to evolve, be replaced, or removed entirely without destabi
 - HDRP Volumes for atmospheric and horror effects
 
 ### Architecture & Patterns
-- DOTS / ECS for performance-critical and scalable systems
-- Hybrid ECS + classic C# architecture where appropriate
+- GameObject-based architecture with modular components
 - VContainer as the primary dependency injection and composition framework
 - MessagePipe for decoupled event-based communication
 - UniTask for async workflows
 - LitMotion for tweening and procedural animation
-- R3 for reactive streams (optional, system-dependent)
+- R3 for reactive streams (input handling, events)
 
-> ECS and DOTS are used deliberately, not dogmatically.
-> Plain C# services remain first-class citizens.
+> Focus on clean architecture, modularity, and performance optimization.
+> Plain C# services composed via VContainer.
 
 ---
 
@@ -235,7 +234,7 @@ Enemies are a core gameplay pillar.
 Possible approaches:
 - Node-based behavior systems
 - Data-driven state machines
-- ECS-based AI
+- Hierarchical state machines
 
 AI systems must be:
 - Extensible
@@ -330,8 +329,8 @@ When implementing systems:
 - Avoid static access and hidden dependencies
 - Use MessagePipe for decoupled communication
 - Use UniTask for async operations
-- MonoBehaviours are adapters or views only
-- ECS systems should remain pure and data-oriented
+- MonoBehaviours should be thin: initialization, Unity callbacks, delegation to services
+- Separate concerns: physics, logic, presentation
 
 Clarity is preferred over clever abstractions.
 
@@ -432,13 +431,18 @@ Assets/Code/
 │   ├── Configuration/       # GameConfig base class
 │   ├── Coroutines/          # ICoroutineRunner, CoroutineRunner
 │   ├── Interfaces/          # IGameService, IInitializableAsync
-│   ├── Logging/             # Log static class
+│   ├── Logging/             # ILogService, UnityLogService, LogConfig
 │   └── Time/                # IGameTime, GameTimeService
 ├── Core.Events/             # Game.Core.Events.asmdef (namespace: Game.Core.Events)
 ├── Infrastructure/          # Game.Infrastructure.asmdef (namespace: Game.Infrastructure)
 │   ├── Assets/              # IAssetLoader, AddressableAssetLoader
-│   └── SceneManagement/     # ISceneLoader, SceneLoader
+│   └── SceneManagement/     # ISceneLoader, SceneLoader (supports Addressables)
 ├── Input/                   # Game.Input.asmdef (namespace: Game.Input)
+├── Player/                  # Game.Player.asmdef (namespace: Game.Player)
+│   ├── Abilities/           # IPlayerAbility, MovementAbility, LookAbility
+│   ├── Configs/             # PlayerMovementConfig, PlayerLookConfig
+│   ├── Motor/               # PlayerMotor (Rigidbody physics)
+│   └── PlayerController.cs  # Manages abilities, blocking, VContainer injection
 └── Gameplay/                # Game.Gameplay.asmdef (namespace: Game.Gameplay)
 ```
 
@@ -451,8 +455,9 @@ Game.Core.Events  ← (no game dependencies, only Unity.Mathematics)
        ↑
 Game.Infrastructure ← Game.Core, Unity.Addressables
 Game.Input          ← Game.Core, R3.Unity, Unity.InputSystem
+Game.Player         ← Game.Core, Game.Input, R3.Unity, VContainer, UniTask, Unity.Cinemachine
        ↑
-  Game.Gameplay     ← All above + MessagePipe.VContainer
+  Game.Gameplay     ← All above + Game.Player
 ```
 
 ### VContainer Setup
@@ -466,9 +471,56 @@ Game.Input          ← Game.Core, R3.Unity, Unity.InputSystem
 
 **GameplayScope** (`Assets/Code/Gameplay/GameplayScope.cs`)
 - Scene-level LifetimeScope, child of ApplicationScope
-- `_configs` array for scene-specific GameConfig assets
+- `_configs` array for scene-specific GameConfig assets (PlayerMovementConfig, PlayerLookConfig)
 - Registers scoped services: `IAssetLoader`, `ISceneLoader`, `IPlayerInput`
 - Add to a GameObject in each gameplay scene
+
+### Player Setup (Ability-based Architecture)
+
+The player uses an ability-based system where each ability (movement, look, etc.) is a separate component managed by PlayerController.
+
+1. Create player GameObject with:
+   - `PlayerController` - manages abilities, blocking, VContainer injection
+   - `PlayerMotor` - low-level Rigidbody physics
+   - `MovementAbility` - movement, sprint, jump
+   - `LookAbility` - camera rotation via CinemachinePanTilt
+   - `Rigidbody`, `CapsuleCollider`
+   - Child with `CinemachineCamera` + `CinemachinePanTilt`
+
+2. Scene requires:
+   - Main Camera with `CinemachineBrain`
+   - `GameplayScope` with VContainer setup
+   - `PlayerMovementConfig` and `PlayerLookConfig` in scope's `_configs` array
+
+3. Ability system:
+   - Abilities stored in serialized array `_abilities` (controls execution order)
+   - All abilities implement `IPlayerAbility`
+   - Controller calls `Tick()` / `FixedTick()` on non-blocked abilities
+   - `OnBlocked()` / `OnUnblocked()` callbacks for state management
+   - Blocker-based blocking prevents conflicts between systems
+
+4. Blocking examples (blocker-based system):
+   ```csharp
+   // Block requires a blocker object - prevents conflicts when multiple systems block
+   player.Block(this, PlayerAbilityType.All);  // cutscene blocks all
+   player.Block(reloadSystem, PlayerAbilityType.Shoot);  // reload blocks shooting
+
+   // Only removes YOUR blocks, not others'
+   player.Unblock(this, PlayerAbilityType.All);  // cutscene unblocks
+   // Shoot still blocked by reloadSystem!
+
+   player.UnblockAll(reloadSystem);  // reload system removes all its blocks
+
+   // Check state
+   if (player.IsBlocked(PlayerAbilityType.Movement)) { ... }
+   if (player.IsBlockedBy(this, PlayerAbilityType.Look)) { ... }
+   ```
+
+5. Adding new abilities:
+   - Create class extending `PlayerAbilityBase`
+   - Add to `PlayerAbilityType` flags if needed
+   - Add component to Player GameObject
+   - Dependencies injected via `[Inject]` method
 
 ### Implemented Services
 
