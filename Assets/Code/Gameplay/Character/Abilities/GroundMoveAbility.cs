@@ -55,27 +55,42 @@ namespace Game.Gameplay.Character.Abilities
             ref Vector3 currentVelocity,
             float deltaTime)
         {
-            var currentSpeed = currentVelocity.magnitude;
-            var groundNormal = motor.GroundingStatus.GroundNormal;
-
-            if (currentSpeed > 0f && motor.GroundingStatus.SnappingPrevented)
+            // If ForceUnground was called (e.g., jump), use airborne logic
+            if (motor.MustUnground())
             {
-                currentVelocity = Vector3.ProjectOnPlane(currentVelocity, groundNormal)
-                    .normalized * currentSpeed;
+                UpdateAirborneVelocity(motor, ref currentVelocity, deltaTime);
+                return;
             }
 
+            var groundNormal = motor.GroundingStatus.GroundNormal;
+
+            // Project current velocity onto ground plane to get current speed
+            var currentOnGround = Vector3.ProjectOnPlane(currentVelocity, groundNormal);
+            var currentSpeed = currentOnGround.magnitude;
+
             var targetSpeed = _isSprinting ? _sprintSpeed : _walkSpeed;
-            var targetVelocity = _moveInput * targetSpeed;
+            var hasInput = _moveInput.sqrMagnitude > 0.01f;
 
-            targetVelocity = motor.GetDirectionTangentToSurface(targetVelocity, groundNormal)
-                * targetVelocity.magnitude;
-
-            var acceleration = _moveInput.sqrMagnitude > 0f ? _acceleration : _deceleration;
-
-            currentVelocity = Vector3.MoveTowards(
-                currentVelocity,
-                targetVelocity,
-                acceleration * deltaTime);
+            if (hasInput)
+            {
+                // Instant direction change (tangent to ground), smooth speed
+                var targetDirection = motor.GetDirectionTangentToSurface(_moveInput.normalized, groundNormal);
+                var newSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, _acceleration * deltaTime);
+                currentVelocity = targetDirection * newSpeed;
+            }
+            else
+            {
+                // Decelerate while keeping current direction on ground
+                var newSpeed = Mathf.MoveTowards(currentSpeed, 0f, _deceleration * deltaTime);
+                if (currentSpeed > 0.01f)
+                {
+                    currentVelocity = currentOnGround.normalized * newSpeed;
+                }
+                else
+                {
+                    currentVelocity = Vector3.zero;
+                }
+            }
         }
 
         private void UpdateAirborneVelocity(

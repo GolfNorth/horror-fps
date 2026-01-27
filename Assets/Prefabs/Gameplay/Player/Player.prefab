@@ -353,7 +353,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KinematicCharacterController::KinematicCharacterController.KinematicCharacterMotor
   Capsule: {fileID: 5185984756196135036}
-  CapsuleRadius: 0.5
+  CapsuleRadius: 0.3
   CapsuleHeight: 2
   CapsuleYOffset: 1
   CapsulePhysicsMaterial: {fileID: 0}
@@ -368,7 +368,7 @@ MonoBehaviour:
   AllowSteppingWithoutStableGrounding: 0
   MinRequiredStepDepth: 0.1
   LedgeAndDenivelationHandling: 1
-  MaxStableDistanceFromLedge: 0.5
+  MaxStableDistanceFromLedge: 0.3
   MaxVelocityForLedgeSnap: 0
   MaxStableDenivelationAngle: 180
   InteractiveRigidbodyHandling: 1
@@ -428,7 +428,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.3
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
