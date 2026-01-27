@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6901629496054386120}
   - component: {fileID: 5208687054687438154}
+  - component: {fileID: 6447674399523548235}
   m_Layer: 0
   m_Name: ApplicationScope
   m_TagString: Untagged
@@ -47,6 +48,20 @@ MonoBehaviour:
   parentReference:
     TypeName: 
   autoRun: 1
-  autoInjectGameObjects: []
-  _configs:
+  autoInjectGameObjects:
+  - {fileID: 658189553443792699}
+--- !u!114 &6447674399523548235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 658189553443792699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: daf8bd5d547cdee40bf01962efc9cc34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Core::Game.Core.Configuration.ConfigLoader
+  _sources:
   - {fileID: 11400000, guid: 01f8d0096cba38a47b42b896d805064a, type: 2}
+  - {fileID: 11400000, guid: 72090f11e2ea6864b931d2e11a71b59b, type: 2}

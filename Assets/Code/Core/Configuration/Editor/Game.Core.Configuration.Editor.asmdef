@@ -1,0 +1,19 @@
+{
+    "name": "Game.Core.Configuration.Editor",
+    "rootNamespace": "Game.Core.Configuration.Editor",
+    "references": [
+        "Game.Core",
+        "Sirenix.OdinInspector.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

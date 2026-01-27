@@ -9,9 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b4934903dc01eb458c2c1ccb12f3f72, type: 3}
+  m_Script: {fileID: 11500000, guid: d8055a98e2384cf4192357bd3822f4b8, type: 3}
   m_Name: LogConfig
-  m_EditorClassIdentifier: Game.Core::Game.Core.Logging.LogConfig
-  developerNotes: 
-  _minLevel: 0
-  _colorizeTag: 1
+  m_EditorClassIdentifier: Game.Core::Game.Core.Configuration.ConfigSource
+  _rootKey: 
+  _sections: []
+  references:
+    version: 2
+    RefIds: []

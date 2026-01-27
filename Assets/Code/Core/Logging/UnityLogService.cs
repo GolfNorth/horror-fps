@@ -1,3 +1,4 @@
+using Game.Core.Configuration;
 using UnityEngine;
 using VContainer;
 
@@ -9,59 +10,61 @@ namespace Game.Core.Logging
     /// </summary>
     public sealed class UnityLogService : ILogService
     {
-        private readonly LogConfig _config;
+        private readonly IConfigValue<LogLevel> _minLevel;
+        private readonly IConfigValue<bool> _colorizeTag;
 
         [Inject]
-        public UnityLogService(LogConfig config)
+        public UnityLogService(IConfigService config)
         {
-            _config = config;
+            _minLevel = config.Observe<LogLevel>("core.log.min_level");
+            _colorizeTag = config.Observe<bool>("core.log.colorize_tag");
         }
 
         public void Info(string tag, string message)
         {
-            if (_config.MinLevel > LogLevel.Info)
+            if (_minLevel.Value > LogLevel.Info)
                 return;
             Debug.Log(FormatMessage(tag, message));
         }
 
         public void Info(string tag, string message, Object context)
         {
-            if (_config.MinLevel > LogLevel.Info)
+            if (_minLevel.Value > LogLevel.Info)
                 return;
             Debug.Log(FormatMessage(tag, message), context);
         }
 
         public void Verbose(string tag, string message)
         {
-            if (_config.MinLevel > LogLevel.Verbose)
+            if (_minLevel.Value > LogLevel.Verbose)
                 return;
             Debug.Log(FormatMessage(tag, message));
         }
 
         public void Warning(string tag, string message)
         {
-            if (_config.MinLevel > LogLevel.Warning)
+            if (_minLevel.Value > LogLevel.Warning)
                 return;
             Debug.LogWarning(FormatMessage(tag, message));
         }
 
         public void Warning(string tag, string message, Object context)
         {
-            if (_config.MinLevel > LogLevel.Warning)
+            if (_minLevel.Value > LogLevel.Warning)
                 return;
             Debug.LogWarning(FormatMessage(tag, message), context);
         }
 
         public void Error(string tag, string message)
         {
-            if (_config.MinLevel > LogLevel.Error)
+            if (_minLevel.Value > LogLevel.Error)
                 return;
             Debug.LogError(FormatMessage(tag, message));
         }
 
         public void Error(string tag, string message, Object context)
         {
-            if (_config.MinLevel > LogLevel.Error)
+            if (_minLevel.Value > LogLevel.Error)
                 return;
             Debug.LogError(FormatMessage(tag, message), context);
         }
@@ -78,7 +81,7 @@ namespace Game.Core.Logging
 
         private string FormatMessage(string tag, string message)
         {
-            if (_config.ColorizeTag)
+            if (_colorizeTag.Value)
             {
                 var color = GetTagColor(tag);
                 return $"<color={color}>[{tag}]</color> {message}";

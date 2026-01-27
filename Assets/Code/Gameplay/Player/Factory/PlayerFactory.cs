@@ -1,7 +1,9 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Game.Core.Configuration;
 using Game.Infrastructure.Assets;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using VContainer;
 using VContainer.Unity;
 
@@ -15,7 +17,7 @@ namespace Game.Gameplay.Player.Factory
     {
         private readonly IObjectResolver _resolver;
         private readonly IAssetLoader _assetLoader;
-        private readonly PlayerFactoryConfig _config;
+        private readonly IConfigValue<AssetReference> _prefabReference;
 
         private GameObject _cachedPrefab;
 
@@ -23,11 +25,11 @@ namespace Game.Gameplay.Player.Factory
         public PlayerFactory(
             IObjectResolver resolver,
             IAssetLoader assetLoader,
-            PlayerFactoryConfig config)
+            IConfigService config)
         {
             _resolver = resolver;
             _assetLoader = assetLoader;
-            _config = config;
+            _prefabReference = config.Observe<AssetReference>("player.factory.prefab");
         }
 
         public async UniTask<GameObject> CreateAsync(
@@ -38,7 +40,7 @@ namespace Game.Gameplay.Player.Factory
             if (_cachedPrefab == null)
             {
                 _cachedPrefab = await _assetLoader.LoadAsync<GameObject>(
-                    _config.PlayerPrefabReference,
+                    _prefabReference.Value,
                     cancellation);
             }
 

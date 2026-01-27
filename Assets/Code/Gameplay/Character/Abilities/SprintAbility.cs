@@ -1,4 +1,4 @@
-using Game.Gameplay.Character.Configs;
+using Game.Core.Configuration;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
@@ -9,15 +9,21 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 5;
 
-        private CharacterMovementConfig _config;
+        [SerializeField] private string _characterId = "player";
+
+        private IConfigValue<float> _sprintSpeed;
+        private IConfigValue<float> _sprintAcceleration;
+
         private bool _wantsToSprint;
 
         public bool IsSprinting => _wantsToSprint;
 
         [Inject]
-        public void Construct(CharacterMovementConfig config)
+        public void Construct(IConfigService config)
         {
-            _config = config;
+            var id = _characterId;
+            _sprintSpeed = config.Observe<float>($"{id}.sprint.speed");
+            _sprintAcceleration = config.Observe<float>($"{id}.sprint.acceleration");
         }
 
         public void SetSprintInput(bool sprint)
@@ -30,7 +36,7 @@ namespace Game.Gameplay.Character.Abilities
             ref Vector3 currentVelocity,
             float deltaTime)
         {
-            if (_config == null) return false;
+            if (_sprintSpeed == null) return false;
             if (!_wantsToSprint || !motor.GroundingStatus.IsStableOnGround)
                 return false;
 
@@ -40,7 +46,7 @@ namespace Game.Gameplay.Character.Abilities
             if (currentSpeed < 0.01f)
                 return false;
 
-            var targetSpeed = Mathf.MoveTowards(currentSpeed, _config.SprintSpeed, _config.SprintAcceleration * deltaTime);
+            var targetSpeed = Mathf.MoveTowards(currentSpeed, _sprintSpeed.Value, _sprintAcceleration.Value * deltaTime);
             var vertical = Vector3.Project(currentVelocity, motor.CharacterUp);
 
             currentVelocity = horizontal.normalized * targetSpeed + vertical;

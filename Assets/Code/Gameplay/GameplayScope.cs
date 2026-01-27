@@ -1,9 +1,7 @@
-using Game.Core.Configuration;
 using Game.Gameplay.Player.Factory;
 using Game.Gameplay.Player.Input;
 using Game.Infrastructure.Assets;
 using Game.Infrastructure.SceneManagement;
-using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -15,26 +13,11 @@ namespace Game.Gameplay
     /// </summary>
     public sealed class GameplayScope : LifetimeScope
     {
-        [Header("Configuration")]
-        [SerializeField] private GameConfig[] _configs;
-
         protected override void Configure(IContainerBuilder builder)
         {
-            RegisterConfigs(builder);
             RegisterInfrastructureServices(builder);
             RegisterInputServices(builder);
             RegisterPlayerFactory(builder);
-        }
-
-        private void RegisterConfigs(IContainerBuilder builder)
-        {
-            foreach (var config in _configs)
-            {
-                if (config != null)
-                {
-                    builder.RegisterInstance(config).As(config.GetType());
-                }
-            }
         }
 
         private static void RegisterInfrastructureServices(IContainerBuilder builder)

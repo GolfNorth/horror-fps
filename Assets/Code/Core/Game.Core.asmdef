@@ -6,7 +6,9 @@
         "UniTask",
         "MessagePipe",
         "MessagePipe.VContainer",
-        "Game.Core.Events"
+        "Game.Core.Events",
+        "R3.Unity",
+        "Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

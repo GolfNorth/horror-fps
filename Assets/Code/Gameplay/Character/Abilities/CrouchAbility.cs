@@ -1,4 +1,4 @@
-using Game.Gameplay.Character.Configs;
+using Game.Core.Configuration;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
@@ -9,10 +9,15 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 3;
 
+        [SerializeField] private string _characterId = "player";
+
         [Header("Optional")]
         [SerializeField] private Transform _meshRoot;
 
-        private CharacterMovementConfig _config;
+        private IConfigValue<float> _crouchSpeed;
+        private IConfigValue<float> _crouchDeceleration;
+        private IConfigValue<float> _crouchHeightRatio;
+
         private readonly Collider[] _probedColliders = new Collider[8];
         private bool _wantsToCrouch;
         private bool _isCrouching;
@@ -24,9 +29,12 @@ namespace Game.Gameplay.Character.Abilities
         public bool IsCrouching => _isCrouching;
 
         [Inject]
-        public void Construct(CharacterMovementConfig config)
+        public void Construct(IConfigService config)
         {
-            _config = config;
+            var id = _characterId;
+            _crouchSpeed = config.Observe<float>($"{id}.crouch.speed");
+            _crouchDeceleration = config.Observe<float>($"{id}.crouch.deceleration");
+            _crouchHeightRatio = config.Observe<float>($"{id}.crouch.height_ratio");
         }
 
         public void SetCrouchInput(bool crouch)
@@ -39,7 +47,7 @@ namespace Game.Gameplay.Character.Abilities
             ref Vector3 currentVelocity,
             float deltaTime)
         {
-            if (_config == null) return false;
+            if (_crouchSpeed == null) return false;
 
             EnsureInitialized(motor);
 
@@ -53,9 +61,9 @@ namespace Game.Gameplay.Character.Abilities
                 var horizontal = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp);
                 var currentSpeed = horizontal.magnitude;
 
-                if (currentSpeed > _config.CrouchSpeed)
+                if (currentSpeed > _crouchSpeed.Value)
                 {
-                    var targetSpeed = Mathf.MoveTowards(currentSpeed, _config.CrouchSpeed, _config.CrouchDeceleration * deltaTime);
+                    var targetSpeed = Mathf.MoveTowards(currentSpeed, _crouchSpeed.Value, _crouchDeceleration.Value * deltaTime);
                     var vertical = Vector3.Project(currentVelocity, motor.CharacterUp);
                     currentVelocity = horizontal.normalized * targetSpeed + vertical;
                 }
@@ -84,13 +92,13 @@ namespace Game.Gameplay.Character.Abilities
         private void Crouch(KinematicCharacterMotor motor)
         {
             _isCrouching = true;
-            var crouchHeight = _standingHeight * _config.CrouchHeightRatio;
+            var crouchHeight = _standingHeight * _crouchHeightRatio.Value;
             motor.SetCapsuleDimensions(_radius, crouchHeight, crouchHeight * 0.5f);
 
             if (_meshRoot != null)
             {
                 var scale = _meshRoot.localScale;
-                scale.y = _config.CrouchHeightRatio;
+                scale.y = _crouchHeightRatio.Value;
                 _meshRoot.localScale = scale;
             }
         }
@@ -104,7 +112,7 @@ namespace Game.Gameplay.Character.Abilities
                     motor.TransientRotation,
                     _probedColliders) > 0)
             {
-                var crouchHeight = _standingHeight * _config.CrouchHeightRatio;
+                var crouchHeight = _standingHeight * _crouchHeightRatio.Value;
                 motor.SetCapsuleDimensions(_radius, crouchHeight, crouchHeight * 0.5f);
             }
             else

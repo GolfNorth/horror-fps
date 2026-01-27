@@ -4,7 +4,6 @@ using Game.Core.Events;
 using Game.Core.Logging;
 using Game.Core.Time;
 using MessagePipe;
-using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -16,28 +15,15 @@ namespace Game.Core.Bootstrap
     /// </summary>
     public sealed class ApplicationScope : LifetimeScope
     {
-        [SerializeField]
-        private GameConfig[] _configs;
-
         protected override void Configure(IContainerBuilder builder)
         {
             var options = builder.RegisterMessagePipe();
 
             builder.RegisterBuildCallback(c => GlobalMessagePipe.SetProvider(c.AsServiceProvider()));
 
-            RegisterConfigs(builder);
             RegisterMessageBrokers(builder, options);
             RegisterCoreServices(builder);
             RegisterEntryPoints(builder);
-        }
-
-        private void RegisterConfigs(IContainerBuilder builder)
-        {
-            foreach (var config in _configs)
-            {
-                if (config != null)
-                    builder.RegisterInstance(config).As(config.GetType());
-            }
         }
 
         private static void RegisterMessageBrokers(IContainerBuilder builder, MessagePipeOptions options)
@@ -66,6 +52,20 @@ namespace Game.Core.Bootstrap
                 Lifetime.Singleton,
                 "CoroutineRunner"
             ).As<ICoroutineRunner>();
+
+            RegisterConfigServices(builder);
+        }
+
+        private static void RegisterConfigServices(IContainerBuilder builder)
+        {
+            builder.Register<ConfigRegistry>(Lifetime.Singleton);
+            builder.Register<ConfigService>(Lifetime.Singleton).As<IConfigService>().AsSelf();
+
+            builder.RegisterBuildCallback(container =>
+            {
+                var configService = container.Resolve<ConfigService>();
+                ConfigServiceLocator.SetInstance(configService);
+            });
         }
 
         private static void RegisterEntryPoints(IContainerBuilder builder)

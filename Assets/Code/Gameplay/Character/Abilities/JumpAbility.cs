@@ -1,4 +1,4 @@
-using Game.Gameplay.Character.Configs;
+using Game.Core.Configuration;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
@@ -9,18 +9,26 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 30;
 
-        private CharacterMovementConfig _config;
+        [SerializeField] private string _characterId = "player";
+
+        private IConfigValue<float> _jumpForce;
+        private IConfigValue<float> _coyoteTime;
+        private IConfigValue<float> _bufferTime;
+
         private bool _jumpRequested;
         private bool _jumpConsumed;
         private float _timeSinceJumpRequested = float.MaxValue;
         private float _timeSinceLastGrounded = float.MaxValue;
 
-        public bool CanJump => _config != null && !_jumpConsumed && _timeSinceLastGrounded <= _config.CoyoteTime;
+        public bool CanJump => _jumpForce != null && !_jumpConsumed && _timeSinceLastGrounded <= _coyoteTime.Value;
 
         [Inject]
-        public void Construct(CharacterMovementConfig config)
+        public void Construct(IConfigService config)
         {
-            _config = config;
+            var id = _characterId;
+            _jumpForce = config.Observe<float>($"{id}.jump.force");
+            _coyoteTime = config.Observe<float>($"{id}.jump.coyote_time");
+            _bufferTime = config.Observe<float>($"{id}.jump.buffer_time");
         }
 
         public void Request()
@@ -34,7 +42,7 @@ namespace Game.Gameplay.Character.Abilities
             ref Vector3 currentVelocity,
             float deltaTime)
         {
-            if (_config == null) return false;
+            if (_jumpForce == null) return false;
 
             _timeSinceJumpRequested += deltaTime;
             _timeSinceLastGrounded += deltaTime;
@@ -46,8 +54,8 @@ namespace Game.Gameplay.Character.Abilities
             }
 
             var canJump = !_jumpConsumed &&
-                          _timeSinceJumpRequested <= _config.JumpBufferTime &&
-                          _timeSinceLastGrounded <= _config.CoyoteTime;
+                          _timeSinceJumpRequested <= _bufferTime.Value &&
+                          _timeSinceLastGrounded <= _coyoteTime.Value;
 
             if (canJump)
             {
@@ -68,7 +76,7 @@ namespace Game.Gameplay.Character.Abilities
 
             motor.ForceUnground();
 
-            currentVelocity += jumpDirection * _config.JumpForce
+            currentVelocity += jumpDirection * _jumpForce.Value
                 - Vector3.Project(currentVelocity, motor.CharacterUp);
 
             _jumpRequested = false;

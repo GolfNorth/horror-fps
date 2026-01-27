@@ -1,4 +1,4 @@
-using Game.Gameplay.Character.Configs;
+using Game.Core.Configuration;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
@@ -9,15 +9,27 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 10;
 
-        private CharacterMovementConfig _config;
+        [SerializeField] private string _characterId = "player";
+
+        private IConfigValue<float> _walkSpeed;
+        private IConfigValue<float> _acceleration;
+        private IConfigValue<float> _deceleration;
+        private IConfigValue<float> _airAcceleration;
+        private IConfigValue<float> _airControl;
+
         private Vector3 _moveInput;
 
         public bool IsMoving => _moveInput.sqrMagnitude > 0.01f;
 
         [Inject]
-        public void Construct(CharacterMovementConfig config)
+        public void Construct(IConfigService config)
         {
-            _config = config;
+            var id = _characterId;
+            _walkSpeed = config.Observe<float>($"{id}.movement.walk_speed");
+            _acceleration = config.Observe<float>($"{id}.movement.acceleration");
+            _deceleration = config.Observe<float>($"{id}.movement.deceleration");
+            _airAcceleration = config.Observe<float>($"{id}.movement.air_acceleration");
+            _airControl = config.Observe<float>($"{id}.movement.air_control");
         }
 
         public void SetMoveInput(Vector3 direction)
@@ -30,7 +42,7 @@ namespace Game.Gameplay.Character.Abilities
             ref Vector3 currentVelocity,
             float deltaTime)
         {
-            if (_config == null) return false;
+            if (_walkSpeed == null) return false;
 
             if (motor.GroundingStatus.IsStableOnGround)
             {
@@ -63,12 +75,12 @@ namespace Game.Gameplay.Character.Abilities
             if (hasInput)
             {
                 var targetDirection = motor.GetDirectionTangentToSurface(_moveInput.normalized, groundNormal);
-                var newSpeed = Mathf.MoveTowards(currentSpeed, _config.WalkSpeed, _config.Acceleration * deltaTime);
+                var newSpeed = Mathf.MoveTowards(currentSpeed, _walkSpeed.Value, _acceleration.Value * deltaTime);
                 currentVelocity = targetDirection * newSpeed;
             }
             else
             {
-                var newSpeed = Mathf.MoveTowards(currentSpeed, 0f, _config.Deceleration * deltaTime);
+                var newSpeed = Mathf.MoveTowards(currentSpeed, 0f, _deceleration.Value * deltaTime);
                 currentVelocity = currentSpeed > 0.01f
                     ? currentOnGround.normalized * newSpeed
                     : Vector3.zero;
@@ -80,13 +92,13 @@ namespace Game.Gameplay.Character.Abilities
             ref Vector3 currentVelocity,
             float deltaTime)
         {
-            var targetHorizontal = _moveInput * (_config.WalkSpeed * _config.AirControl);
+            var targetHorizontal = _moveInput * (_walkSpeed.Value * _airControl.Value);
             var horizontal = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp);
 
             horizontal = Vector3.MoveTowards(
                 horizontal,
                 targetHorizontal,
-                _config.AirAcceleration * deltaTime);
+                _airAcceleration.Value * deltaTime);
 
             currentVelocity = horizontal + Vector3.Project(currentVelocity, motor.CharacterUp);
         }
