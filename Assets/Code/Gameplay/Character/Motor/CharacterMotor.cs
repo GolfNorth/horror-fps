@@ -53,7 +53,16 @@ namespace Game.Gameplay.Character.Motor
 
         public void PostGroundingUpdate(float deltaTime) { }
 
-        public void AfterCharacterUpdate(float deltaTime) { }
+        public void AfterCharacterUpdate(float deltaTime)
+        {
+            foreach (var ability in _abilities)
+            {
+                if (ability.isActiveAndEnabled)
+                {
+                    ability.AfterCharacterUpdate(_motor, deltaTime);
+                }
+            }
+        }
 
         public bool IsColliderValidForCollisions(Collider coll) => true;
 

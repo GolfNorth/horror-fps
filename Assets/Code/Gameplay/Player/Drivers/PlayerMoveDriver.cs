@@ -30,13 +30,11 @@ namespace Game.Gameplay.Player.Drivers
             if (moveInput.sqrMagnitude < 0.01f)
             {
                 _ability.SetMoveInput(Vector3.zero);
-                _ability.SetSprinting(false);
                 return;
             }
 
             var direction = CalculateWorldDirection(moveInput);
             _ability.SetMoveInput(direction);
-            _ability.SetSprinting(_input.IsSprinting);
         }
 
         private Vector3 CalculateWorldDirection(Vector2 input)

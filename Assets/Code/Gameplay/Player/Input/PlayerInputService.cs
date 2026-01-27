@@ -23,6 +23,7 @@ namespace Game.Gameplay.Player.Input
         private readonly Subject<Unit> _attackSubject = new();
         private readonly Subject<Unit> _interactSubject = new();
         private readonly Subject<int> _weaponSwitchSubject = new();
+        private readonly Subject<bool> _crouchSubject = new();
 
         public Vector2 MoveInput => _inputActions?.Player.Move.ReadValue<Vector2>() ?? Vector2.zero;
         public Vector2 LookInput => _inputActions?.Player.Look.ReadValue<Vector2>() ?? Vector2.zero;
@@ -33,6 +34,7 @@ namespace Game.Gameplay.Player.Input
         public Observable<Unit> OnAttack => _attackSubject;
         public Observable<Unit> OnInteract => _interactSubject;
         public Observable<int> OnWeaponSwitch => _weaponSwitchSubject;
+        public Observable<bool> IsCrouchingChanged => _crouchSubject;
 
         [Inject]
         public PlayerInputService(ILogService log)
@@ -50,6 +52,8 @@ namespace Game.Gameplay.Player.Input
             _inputActions.Player.Interact.performed += _ => _interactSubject.OnNext(Unit.Default);
             _inputActions.Player.Previous.performed += _ => _weaponSwitchSubject.OnNext(-1);
             _inputActions.Player.Next.performed += _ => _weaponSwitchSubject.OnNext(1);
+            _inputActions.Player.Crouch.started += _ => _crouchSubject.OnNext(true);
+            _inputActions.Player.Crouch.canceled += _ => _crouchSubject.OnNext(false);
 
             _log.Info(LogTag, "Initialized");
         }
@@ -70,6 +74,7 @@ namespace Game.Gameplay.Player.Input
             _attackSubject.Dispose();
             _interactSubject.Dispose();
             _weaponSwitchSubject.Dispose();
+            _crouchSubject.Dispose();
             _disposables.Dispose();
 
             _inputActions?.Disable();

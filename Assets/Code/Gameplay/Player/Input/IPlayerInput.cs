@@ -29,6 +29,11 @@ namespace Game.Gameplay.Player.Input
         bool IsCrouching { get; }
 
         /// <summary>
+        /// Crouch state changed (true = started, false = released).
+        /// </summary>
+        Observable<bool> IsCrouchingChanged { get; }
+
+        /// <summary>
         /// Jump action triggered.
         /// </summary>
         Observable<Unit> OnJump { get; }

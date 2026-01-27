@@ -1,5 +1,7 @@
+using Game.Gameplay.Character.Configs;
 using KinematicCharacterController;
 using UnityEngine;
+using VContainer;
 
 namespace Game.Gameplay.Character.Abilities
 {
@@ -7,25 +9,30 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 0;
 
-        [SerializeField] private float _gravityMultiplier = 2f;
-        [SerializeField] private float _fallMultiplier = 2.5f;
-        [SerializeField] private float _maxFallSpeed = 20f;
+        private CharacterMovementConfig _config;
+
+        [Inject]
+        public void Construct(CharacterMovementConfig config)
+        {
+            _config = config;
+        }
 
         public override bool UpdateVelocity(
             KinematicCharacterMotor motor,
             ref Vector3 currentVelocity,
             float deltaTime)
         {
+            if (_config == null) return false;
             if (motor.GroundingStatus.IsStableOnGround)
                 return false;
 
-            var multiplier = currentVelocity.y < 0f ? _fallMultiplier : _gravityMultiplier;
+            var multiplier = currentVelocity.y < 0f ? _config.FallMultiplier : _config.GravityMultiplier;
             currentVelocity += Physics.gravity * (multiplier * deltaTime);
 
             var verticalSpeed = Vector3.Dot(currentVelocity, motor.CharacterUp);
-            if (verticalSpeed < -_maxFallSpeed)
+            if (verticalSpeed < -_config.MaxFallSpeed)
             {
-                currentVelocity += motor.CharacterUp * (-_maxFallSpeed - verticalSpeed);
+                currentVelocity += motor.CharacterUp * (-_config.MaxFallSpeed - verticalSpeed);
             }
 
             return false;

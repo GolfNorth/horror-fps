@@ -1,5 +1,7 @@
+using Game.Gameplay.Character.Configs;
 using KinematicCharacterController;
 using UnityEngine;
+using VContainer;
 
 namespace Game.Gameplay.Character.Abilities
 {
@@ -7,16 +9,19 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 30;
 
-        [SerializeField] private float _jumpForce = 7f;
-        [SerializeField] private float _coyoteTime = 0.15f;
-        [SerializeField] private float _jumpBufferTime = 0.1f;
-
+        private CharacterMovementConfig _config;
         private bool _jumpRequested;
         private bool _jumpConsumed;
         private float _timeSinceJumpRequested = float.MaxValue;
         private float _timeSinceLastGrounded = float.MaxValue;
 
-        public bool CanJump => !_jumpConsumed && _timeSinceLastGrounded <= _coyoteTime;
+        public bool CanJump => _config != null && !_jumpConsumed && _timeSinceLastGrounded <= _config.CoyoteTime;
+
+        [Inject]
+        public void Construct(CharacterMovementConfig config)
+        {
+            _config = config;
+        }
 
         public void Request()
         {
@@ -29,6 +34,8 @@ namespace Game.Gameplay.Character.Abilities
             ref Vector3 currentVelocity,
             float deltaTime)
         {
+            if (_config == null) return false;
+
             _timeSinceJumpRequested += deltaTime;
             _timeSinceLastGrounded += deltaTime;
 
@@ -39,8 +46,8 @@ namespace Game.Gameplay.Character.Abilities
             }
 
             var canJump = !_jumpConsumed &&
-                          _timeSinceJumpRequested <= _jumpBufferTime &&
-                          _timeSinceLastGrounded <= _coyoteTime;
+                          _timeSinceJumpRequested <= _config.JumpBufferTime &&
+                          _timeSinceLastGrounded <= _config.CoyoteTime;
 
             if (canJump)
             {
@@ -61,7 +68,7 @@ namespace Game.Gameplay.Character.Abilities
 
             motor.ForceUnground();
 
-            currentVelocity += jumpDirection * _jumpForce
+            currentVelocity += jumpDirection * _config.JumpForce
                 - Vector3.Project(currentVelocity, motor.CharacterUp);
 
             _jumpRequested = false;

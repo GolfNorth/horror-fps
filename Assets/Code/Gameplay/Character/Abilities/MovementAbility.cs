@@ -22,5 +22,10 @@ namespace Game.Gameplay.Character.Abilities
             KinematicCharacterMotor motor,
             ref Quaternion currentRotation,
             float deltaTime) => false;
+
+        /// <summary>
+        /// Called after character update. Used for state cleanup and deferred actions.
+        /// </summary>
+        public virtual void AfterCharacterUpdate(KinematicCharacterMotor motor, float deltaTime) { }
     }
 }
