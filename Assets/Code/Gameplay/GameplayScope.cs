@@ -1,8 +1,8 @@
 using Game.Core.Configuration;
+using Game.Gameplay.Player.Factory;
+using Game.Gameplay.Player.Input;
 using Game.Infrastructure.Assets;
 using Game.Infrastructure.SceneManagement;
-using Game.Input;
-using Game.Player;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -18,15 +18,12 @@ namespace Game.Gameplay
         [Header("Configuration")]
         [SerializeField] private GameConfig[] _configs;
 
-        [Header("Player")]
-        [SerializeField] private PlayerController _player;
-
         protected override void Configure(IContainerBuilder builder)
         {
             RegisterConfigs(builder);
             RegisterInfrastructureServices(builder);
             RegisterInputServices(builder);
-            RegisterPlayer(builder);
+            RegisterPlayerFactory(builder);
         }
 
         private void RegisterConfigs(IContainerBuilder builder)
@@ -51,24 +48,9 @@ namespace Game.Gameplay
             builder.Register<PlayerInputService>(Lifetime.Scoped).AsImplementedInterfaces();
         }
 
-        private void RegisterPlayer(IContainerBuilder builder)
+        private static void RegisterPlayerFactory(IContainerBuilder builder)
         {
-            if (_player == null) return;
-
-            builder.RegisterComponent(_player);
-
-            foreach (var ability in _player.Abilities)
-            {
-                if (ability != null)
-                {
-                    builder.RegisterComponent(ability);
-                }
-            }
-
-            builder.RegisterBuildCallback(resolver =>
-            {
-                resolver.InjectGameObject(_player.gameObject);
-            });
+            builder.Register<PlayerFactory>(Lifetime.Scoped).As<IPlayerFactory>();
         }
     }
 }

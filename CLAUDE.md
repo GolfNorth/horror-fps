@@ -425,25 +425,30 @@ This section describes what is **already implemented** in the codebase.
 ### Code Structure
 
 ```
-Assets/Code/
-├── Core/                    # Game.Core.asmdef (namespace: Game.Core)
-│   ├── Bootstrap/           # GameBootstrapper, ApplicationScope
-│   ├── Configuration/       # GameConfig base class
-│   ├── Coroutines/          # ICoroutineRunner, CoroutineRunner
-│   ├── Interfaces/          # IGameService, IInitializableAsync
-│   ├── Logging/             # ILogService, UnityLogService, LogConfig
-│   └── Time/                # IGameTime, GameTimeService
-├── Core.Events/             # Game.Core.Events.asmdef (namespace: Game.Core.Events)
-├── Infrastructure/          # Game.Infrastructure.asmdef (namespace: Game.Infrastructure)
-│   ├── Assets/              # IAssetLoader, AddressableAssetLoader
-│   └── SceneManagement/     # ISceneLoader, SceneLoader (supports Addressables)
-├── Input/                   # Game.Input.asmdef (namespace: Game.Input)
-├── Player/                  # Game.Player.asmdef (namespace: Game.Player)
-│   ├── Abilities/           # IPlayerAbility, MovementAbility, LookAbility
-│   ├── Configs/             # PlayerMovementConfig, PlayerLookConfig
-│   ├── Motor/               # PlayerMotor (Rigidbody physics)
-│   └── PlayerController.cs  # Manages abilities, blocking, VContainer injection
-└── Gameplay/                # Game.Gameplay.asmdef (namespace: Game.Gameplay)
+Assets/
+├── Code/
+│   ├── Core/                    # Game.Core.asmdef (namespace: Game.Core)
+│   │   ├── Bootstrap/           # GameBootstrapper, ApplicationScope
+│   │   ├── Configuration/       # GameConfig base class
+│   │   ├── Coroutines/          # ICoroutineRunner, CoroutineRunner
+│   │   ├── Interfaces/          # IGameService, IInitializableAsync
+│   │   ├── Logging/             # ILogService, UnityLogService, LogConfig
+│   │   └── Time/                # IGameTime, GameTimeService
+│   ├── Core.Events/             # Game.Core.Events.asmdef (namespace: Game.Core.Events)
+│   ├── Infrastructure/          # Game.Infrastructure.asmdef (namespace: Game.Infrastructure)
+│   │   ├── Assets/              # IAssetLoader, AddressableAssetLoader
+│   │   └── SceneManagement/     # ISceneLoader, SceneLoader (supports Addressables)
+│   └── Gameplay/                # Game.Gameplay.asmdef (namespace: Game.Gameplay)
+│       ├── Character/           # Универсальная система движения (namespace: Game.Gameplay.Character)
+│       │   ├── Motor/           # CharacterMotor (KCC wrapper)
+│       │   └── Abilities/       # MovementAbility base + конкретные abilities
+│       ├── Player/
+│       │   ├── Drivers/         # Input → Abilities связь (namespace: Game.Gameplay.Player.Drivers)
+│       │   └── Input/           # IPlayerInput, PlayerInputService (namespace: Game.Gameplay.Player.Input)
+│       └── GameplayScope.cs
+└── Settings/
+    └── Core/
+        └── InputSystem_Actions.inputactions  # Input actions definition
 ```
 
 ### Assembly Dependencies
@@ -454,10 +459,10 @@ Game.Core.Events  ← (no game dependencies, only Unity.Mathematics)
    Game.Core      ← VContainer, UniTask, MessagePipe, MessagePipe.VContainer
        ↑
 Game.Infrastructure ← Game.Core, Unity.Addressables
-Game.Input          ← Game.Core, R3.Unity, Unity.InputSystem
-Game.Player         ← Game.Core, Game.Input, R3.Unity, VContainer, UniTask, Unity.Cinemachine
        ↑
-  Game.Gameplay     ← All above + Game.Player
+  Game.Gameplay   ← Game.Core, Game.Core.Events, Game.Infrastructure,
+                    VContainer, UniTask, MessagePipe, R3.Unity,
+                    Unity.InputSystem, Unity.Cinemachine, KinematicCharacterController
 ```
 
 ### VContainer Setup
@@ -475,52 +480,61 @@ Game.Player         ← Game.Core, Game.Input, R3.Unity, VContainer, UniTask, Un
 - Registers scoped services: `IAssetLoader`, `ISceneLoader`, `IPlayerInput`
 - Add to a GameObject in each gameplay scene
 
-### Player Setup (Ability-based Architecture)
+### Character Movement System
 
-The player uses an ability-based system where each ability (movement, look, etc.) is a separate component managed by PlayerController.
+Universal movement system based on KinematicCharacterController, usable by players and AI.
+
+**Architecture:**
+- `CharacterMotor` - wrapper for KCC, dispatches to abilities by priority
+- `MovementAbility` - base class for movement mechanics
+- Abilities return `true` from Update methods to take exclusive control
+
+**Built-in Abilities:**
+
+| Ability | Priority | Description |
+|---------|----------|-------------|
+| `GravityAbility` | 0 | Applies gravity when airborne |
+| `GroundMoveAbility` | 10 | Walking, sprinting, air control |
+| `BodyRotationAbility` | 10 | Body yaw rotation |
+| `JumpAbility` | 30 | Jump with coyote time and buffer |
+
+**Adding new abilities:**
+```csharp
+public class WallRunAbility : MovementAbility
+{
+    public override int Priority => 50; // Higher = checked first
+
+    public override bool UpdateVelocity(
+        KinematicCharacterMotor motor,
+        ref Vector3 velocity,
+        float deltaTime)
+    {
+        if (!_isWallRunning) return false; // Let others handle
+
+        velocity = CalculateWallRunVelocity();
+        return true; // Exclusive control
+    }
+}
+```
+
+### Player Setup
 
 1. Create player GameObject with:
-   - `PlayerController` - manages abilities, blocking, VContainer injection
-   - `PlayerMotor` - low-level Rigidbody physics
-   - `MovementAbility` - movement, sprint, jump
-   - `LookAbility` - camera rotation via CinemachinePanTilt
-   - `Rigidbody`, `CapsuleCollider`
+   - `KinematicCharacterMotor` (from KCC plugin)
+   - `CharacterMotor` (wrapper, references abilities)
+   - `GroundMoveAbility`, `JumpAbility`, `GravityAbility`, `BodyRotationAbility`
+   - `PlayerMoveDriver`, `PlayerJumpDriver`, `PlayerLookDriver` (input → abilities)
+   - `CapsuleCollider`
    - Child with `CinemachineCamera` + `CinemachinePanTilt`
 
 2. Scene requires:
    - Main Camera with `CinemachineBrain`
-   - `GameplayScope` with VContainer setup
-   - `PlayerMovementConfig` and `PlayerLookConfig` in scope's `_configs` array
+   - `GameplayScope` with player GameObject reference
 
-3. Ability system:
-   - Abilities stored in serialized array `_abilities` (controls execution order)
-   - All abilities implement `IPlayerAbility`
-   - Controller calls `Tick()` / `FixedTick()` on non-blocked abilities
-   - `OnBlocked()` / `OnUnblocked()` callbacks for state management
-   - Blocker-based blocking prevents conflicts between systems
-
-4. Blocking examples (blocker-based system):
-   ```csharp
-   // Block requires a blocker object - prevents conflicts when multiple systems block
-   player.Block(this, PlayerAbilityType.All);  // cutscene blocks all
-   player.Block(reloadSystem, PlayerAbilityType.Shoot);  // reload blocks shooting
-
-   // Only removes YOUR blocks, not others'
-   player.Unblock(this, PlayerAbilityType.All);  // cutscene unblocks
-   // Shoot still blocked by reloadSystem!
-
-   player.UnblockAll(reloadSystem);  // reload system removes all its blocks
-
-   // Check state
-   if (player.IsBlocked(PlayerAbilityType.Movement)) { ... }
-   if (player.IsBlockedBy(this, PlayerAbilityType.Look)) { ... }
-   ```
-
-5. Adding new abilities:
-   - Create class extending `PlayerAbilityBase`
-   - Add to `PlayerAbilityType` flags if needed
-   - Add component to Player GameObject
-   - Dependencies injected via `[Inject]` method
+3. Driver pattern:
+   - Drivers read input and call ability methods
+   - Abilities don't know about input
+   - Same abilities work for AI (with AI drivers instead)
 
 ### Implemented Services
 
@@ -531,7 +545,7 @@ The player uses an ability-based system where each ability (movement, look, etc.
 | `ICoroutineRunner` | `CoroutineRunner` | Singleton | Core |
 | `IAssetLoader` | `AddressableAssetLoader` | Scoped | Infrastructure |
 | `ISceneLoader` | `SceneLoader` | Scoped | Infrastructure |
-| `IPlayerInput` | `PlayerInputService` | Scoped | Input |
+| `IPlayerInput` | `PlayerInputService` | Scoped | Gameplay/Player/Input |
 
 ### MessagePipe Events
 
@@ -543,9 +557,10 @@ Registered in `ApplicationScope`:
 
 ### Input System
 
-- Input actions defined in `Assets/InputSystem_Actions.inputactions`
+- Input actions defined in `Assets/Settings/Core/InputSystem_Actions.inputactions`
 - Actions: Move, Look, Attack, Interact, Crouch, Jump, Previous, Next, Sprint
-- Wrapped by `PlayerInputService` exposing R3 observables
+- Wrapped by `PlayerInputService` (in `Game.Gameplay.Player.Input`) exposing R3 observables
+- Generated C# class `InputSystem_Actions` uses `Game.Input` namespace (auto-generated)
 
 ### Configuration Base
 

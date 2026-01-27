@@ -4,13 +4,16 @@
     "references": [
         "Game.Core",
         "Game.Core.Events",
-        "Game.Input",
         "Game.Infrastructure",
-        "Game.Player",
         "VContainer",
         "UniTask",
         "MessagePipe",
-        "MessagePipe.VContainer"
+        "MessagePipe.VContainer",
+        "R3.Unity",
+        "Unity.InputSystem",
+        "Unity.Cinemachine",
+        "KinematicCharacterController",
+        "Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
