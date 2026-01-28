@@ -81,7 +81,7 @@ namespace Game.Gameplay.Character.Motor
         private void Reset()
         {
             _motor = GetComponent<KinematicCharacterMotor>();
-            _abilities = GetComponents<MovementAbility>();
+            _abilities = GetComponentsInChildren<MovementAbility>();
         }
     }
 }

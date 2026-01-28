@@ -12,8 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8055a98e2384cf4192357bd3822f4b8, type: 3}
   m_Name: LogConfig
   m_EditorClassIdentifier: Game.Core::Game.Core.Configuration.ConfigSource
-  _rootKey: 
-  _sections: []
+  _rootKey: core
+  _sections:
+  - rid: 6440899049025700389
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 6440899049025700389
+      type: {class: LogSection, ns: Game.Core.Logging, asm: Game.Core}
+      data:
+        _minLevel: 0
+        _colorizeTag: 1

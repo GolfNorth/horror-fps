@@ -13,7 +13,7 @@ namespace Game.Core.Configuration
         private string _rootKey;
 
         [SerializeReference]
-        [ValueDropdown("GetAllSections", IsUniqueList = true)]
+        [ValueDropdown("GetAllSections")]
         [ListDrawerSettings(ListElementLabelName = "DisplayName")]
         private IConfigSection[] _sections = Array.Empty<IConfigSection>();
 

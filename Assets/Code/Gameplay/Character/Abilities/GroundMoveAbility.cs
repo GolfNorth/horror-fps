@@ -9,7 +9,7 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 10;
 
-        [SerializeField] private string _characterId = "player";
+        [SerializeField] private CharacterIdProvider _idProvider;
 
         private IConfigValue<float> _walkSpeed;
         private IConfigValue<float> _acceleration;
@@ -24,7 +24,7 @@ namespace Game.Gameplay.Character.Abilities
         [Inject]
         public void Construct(IConfigService config)
         {
-            var id = _characterId;
+            var id = _idProvider.CharacterId;
             _walkSpeed = config.Observe<float>($"{id}.movement.walk_speed");
             _acceleration = config.Observe<float>($"{id}.movement.acceleration");
             _deceleration = config.Observe<float>($"{id}.movement.deceleration");
@@ -101,6 +101,11 @@ namespace Game.Gameplay.Character.Abilities
                 _airAcceleration.Value * deltaTime);
 
             currentVelocity = horizontal + Vector3.Project(currentVelocity, motor.CharacterUp);
+        }
+
+        private void Reset()
+        {
+            _idProvider = GetComponentInParent<CharacterIdProvider>();
         }
     }
 }

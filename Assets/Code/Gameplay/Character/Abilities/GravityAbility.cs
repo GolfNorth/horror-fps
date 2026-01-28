@@ -9,7 +9,7 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 0;
 
-        [SerializeField] private string _characterId = "player";
+        [SerializeField] private CharacterIdProvider _idProvider;
 
         private IConfigValue<float> _gravityMultiplier;
         private IConfigValue<float> _fallMultiplier;
@@ -18,7 +18,7 @@ namespace Game.Gameplay.Character.Abilities
         [Inject]
         public void Construct(IConfigService config)
         {
-            var id = _characterId;
+            var id = _idProvider.CharacterId;
             _gravityMultiplier = config.Observe<float>($"{id}.gravity.multiplier");
             _fallMultiplier = config.Observe<float>($"{id}.gravity.fall_multiplier");
             _maxFallSpeed = config.Observe<float>($"{id}.gravity.max_fall_speed");
@@ -43,6 +43,11 @@ namespace Game.Gameplay.Character.Abilities
             }
 
             return false;
+        }
+
+        private void Reset()
+        {
+            _idProvider = GetComponentInParent<CharacterIdProvider>();
         }
     }
 }

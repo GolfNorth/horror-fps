@@ -9,7 +9,7 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 30;
 
-        [SerializeField] private string _characterId = "player";
+        [SerializeField] private CharacterIdProvider _idProvider;
 
         private IConfigValue<float> _jumpForce;
         private IConfigValue<float> _coyoteTime;
@@ -25,7 +25,7 @@ namespace Game.Gameplay.Character.Abilities
         [Inject]
         public void Construct(IConfigService config)
         {
-            var id = _characterId;
+            var id = _idProvider.CharacterId;
             _jumpForce = config.Observe<float>($"{id}.jump.force");
             _coyoteTime = config.Observe<float>($"{id}.jump.coyote_time");
             _bufferTime = config.Observe<float>($"{id}.jump.buffer_time");
@@ -81,6 +81,11 @@ namespace Game.Gameplay.Character.Abilities
 
             _jumpRequested = false;
             _jumpConsumed = true;
+        }
+
+        private void Reset()
+        {
+            _idProvider = GetComponentInParent<CharacterIdProvider>();
         }
     }
 }

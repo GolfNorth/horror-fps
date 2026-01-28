@@ -9,7 +9,7 @@ namespace Game.Gameplay.Character.Abilities
     {
         public override int Priority => 3;
 
-        [SerializeField] private string _characterId = "player";
+        [SerializeField] private CharacterIdProvider _idProvider;
 
         [Header("Optional")]
         [SerializeField] private Transform _meshRoot;
@@ -31,7 +31,7 @@ namespace Game.Gameplay.Character.Abilities
         [Inject]
         public void Construct(IConfigService config)
         {
-            var id = _characterId;
+            var id = _idProvider.CharacterId;
             _crouchSpeed = config.Observe<float>($"{id}.crouch.speed");
             _crouchDeceleration = config.Observe<float>($"{id}.crouch.deceleration");
             _crouchHeightRatio = config.Observe<float>($"{id}.crouch.height_ratio");
@@ -126,6 +126,11 @@ namespace Game.Gameplay.Character.Abilities
                     _meshRoot.localScale = scale;
                 }
             }
+        }
+
+        private void Reset()
+        {
+            _idProvider = GetComponentInParent<CharacterIdProvider>();
         }
     }
 }
