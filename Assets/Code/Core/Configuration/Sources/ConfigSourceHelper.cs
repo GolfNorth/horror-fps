@@ -1,6 +1,8 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Sirenix.OdinInspector;
 
@@ -8,43 +10,66 @@ namespace Game.Core.Configuration
 {
     public static class ConfigSourceHelper
     {
-        private static ValueDropdownList<IConfigSection> _sectionDropdown;
+        private static List<ValueDropdownItem<IConfigSection>> _cachedItems;
+        private static bool _initialized;
 
-        private static void EnsureTypesLoaded()
+        public static IEnumerable GetAllSections()
         {
-            if (_sectionDropdown != null)
-                return;
-            _sectionDropdown = new ValueDropdownList<IConfigSection>();
+            if (!_initialized)
+            {
+                BuildCache();
+                _initialized = true;
+            }
+
+            return _cachedItems;
+        }
+
+        private static void BuildCache()
+        {
+            _cachedItems = new List<ValueDropdownItem<IConfigSection>>();
+
             var interfaceType = typeof(IConfigSection);
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
                 {
                     foreach (var type in assembly.GetTypes())
                     {
-                        if (type.IsValueType && !type.IsAbstract && interfaceType.IsAssignableFrom(type))
+                        if (!type.IsValueType || type.IsAbstract || !interfaceType.IsAssignableFrom(type))
+                            continue;
+
+                        var defaultProperty = type.GetProperty("Default", BindingFlags.Public | BindingFlags.Static);
+
+                        IConfigSection instance;
+
+                        if (defaultProperty != null)
                         {
-                            var defaultProp = type.GetProperty("Default", BindingFlags.Public | BindingFlags.Static)!;
-                            var instance = (IConfigSection)defaultProp.GetValue(null);
-                            _sectionDropdown.Add(new ValueDropdownItem<IConfigSection>(instance.DisplayName, instance));
+                            instance = (IConfigSection)defaultProperty.GetValue(null);
                         }
+                        else
+                        {
+                            instance = (IConfigSection)Activator.CreateInstance(type);
+                        }
+
+                        var displayName = instance.DisplayName ?? type.Name;
+
+                        _cachedItems.Add(new ValueDropdownItem<IConfigSection>(displayName, instance));
                     }
                 }
                 catch
                 {
-                    // Skip assemblies that can't be loaded
+                    // Skip problematic assemblies
                 }
             }
+
+            _cachedItems = _cachedItems.OrderBy(x => x.Text).ToList();
         }
 
-        internal static IEnumerable GetAllSections()
+        public static void ClearCache()
         {
-            EnsureTypesLoaded();
-
-            foreach (var item in _sectionDropdown)
-            {
-                yield return item;
-            }
+            _cachedItems = null;
+            _initialized = false;
         }
     }
 }

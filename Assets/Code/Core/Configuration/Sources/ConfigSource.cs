@@ -21,8 +21,6 @@ namespace Game.Core.Configuration
         public IReadOnlyList<IConfigSection> Sections => _sections;
 
 #if UNITY_EDITOR
-        internal static Func<IEnumerable> GetAllSectionsOverride;
-
         private IEnumerable GetAllSections()
         {
             return ConfigSourceHelper.GetAllSections();

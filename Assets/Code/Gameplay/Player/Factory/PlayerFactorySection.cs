@@ -13,10 +13,5 @@ namespace Game.Gameplay.Player.Factory
 
         [ConfigKey("prefab")]
         [SerializeField] private AssetReference _prefab;
-        
-        public static PlayerFactorySection Default => new PlayerFactorySection
-        {
-            _prefab = null
-        };
     }
 }
