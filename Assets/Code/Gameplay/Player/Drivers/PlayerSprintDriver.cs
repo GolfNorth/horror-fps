@@ -1,11 +1,13 @@
+using Game.Core.Ticking;
 using Game.Gameplay.Character.Abilities;
 using Game.Gameplay.Player.Input;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Player.Drivers
 {
-    public class PlayerSprintDriver : MonoBehaviour
+    public class PlayerSprintDriver : TickableBehaviour, ITickable
     {
         [SerializeField] private SprintAbility _ability;
 
@@ -17,10 +19,8 @@ namespace Game.Gameplay.Player.Drivers
             _input = input;
         }
 
-        private void Update()
+        public void Tick()
         {
-            if (_input == null) return;
-
             _ability.SetSprintInput(_input.IsSprinting);
         }
 

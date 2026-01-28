@@ -1,12 +1,14 @@
+using Game.Core.Ticking;
 using Game.Gameplay.Character.Abilities;
 using Game.Gameplay.Player.Input;
 using R3;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Player.Drivers
 {
-    public class PlayerLadderDriver : MonoBehaviour
+    public class PlayerLadderDriver : TickableBehaviour, ITickable
     {
         [SerializeField] private LadderClimbAbility _ladderAbility;
 
@@ -26,10 +28,8 @@ namespace Game.Gameplay.Player.Drivers
                 .AddTo(this);
         }
 
-        private void Update()
+        public void Tick()
         {
-            if (_input == null || _ladderAbility == null) return;
-
             if (_ladderAbility.IsClimbing)
             {
                 var moveInput = _input.MoveInput;

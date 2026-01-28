@@ -1,12 +1,13 @@
+using Game.Core.Ticking;
 using Game.Gameplay.Character.Abilities;
 using Game.Gameplay.Player.Input;
-using R3;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Player.Drivers
 {
-    public class PlayerMoveDriver : MonoBehaviour
+    public class PlayerMoveDriver : TickableBehaviour, ITickable
     {
         [SerializeField] private GroundMoveAbility _ability;
         [SerializeField] private Transform _cameraTransform;
@@ -17,14 +18,10 @@ namespace Game.Gameplay.Player.Drivers
         public void Construct(IPlayerInput input)
         {
             _input = input;
-
-            Observable.EveryUpdate().Subscribe(Tick).AddTo(this);
         }
 
-        private void Tick(Unit _)
+        public void Tick()
         {
-            if (_input == null) return;
-
             var moveInput = _input.MoveInput;
 
             if (moveInput.sqrMagnitude < 0.01f)

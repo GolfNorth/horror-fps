@@ -1,14 +1,16 @@
 using Game.Core.Configuration;
+using Game.Core.Ticking;
 using Game.Gameplay.Character;
 using Game.Gameplay.Character.Abilities;
 using Game.Gameplay.Player.Input;
 using Unity.Cinemachine;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Player.Drivers
 {
-    public class PlayerLookDriver : MonoBehaviour
+    public class PlayerLookDriver : TickableBehaviour, ITickable
     {
         [SerializeField] private BodyRotationAbility _bodyRotation;
         [SerializeField] private CinemachinePanTilt _panTilt;
@@ -48,19 +50,20 @@ namespace Game.Gameplay.Player.Drivers
             LockCursor();
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             LockCursor();
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
             UnlockCursor();
         }
 
-        private void Update()
+        public void Tick()
         {
-            if (_input == null || _horizontalSensitivity == null || _bodyRotation == null) return;
 
             var lookInput = _input.LookInput;
 

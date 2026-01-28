@@ -1,9 +1,11 @@
+using Game.Core.Ticking;
 using KinematicCharacterController;
 using UnityEngine;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Character.Abilities
 {
-    public class CameraHeightAbility : MonoBehaviour
+    public class CameraHeightAbility : TickableBehaviour, ILateTickable
     {
         [SerializeField] private KinematicCharacterMotor _motor;
         [SerializeField] private Transform _cameraTarget;
@@ -14,7 +16,7 @@ namespace Game.Gameplay.Character.Abilities
 
         private float _currentHeight;
 
-        private void Awake()
+        private void Start()
         {
             if (_motor != null)
             {
@@ -22,7 +24,7 @@ namespace Game.Gameplay.Character.Abilities
             }
         }
 
-        private void LateUpdate()
+        public void LateTick()
         {
             if (_cameraTarget == null || _motor == null) return;
 

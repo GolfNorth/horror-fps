@@ -2,6 +2,7 @@ using Game.Core.Configuration;
 using Game.Core.Coroutines;
 using Game.Core.Events;
 using Game.Core.Logging;
+using Game.Core.Ticking;
 using Game.Core.Time;
 using MessagePipe;
 using VContainer;
@@ -52,6 +53,11 @@ namespace Game.Core.Bootstrap
                 Lifetime.Singleton,
                 "CoroutineRunner"
             ).As<ICoroutineRunner>();
+
+            builder.RegisterComponentOnNewGameObject<TickService>(
+                Lifetime.Singleton,
+                "TickService"
+            ).As<ITickService>();
 
             RegisterConfigServices(builder);
         }
