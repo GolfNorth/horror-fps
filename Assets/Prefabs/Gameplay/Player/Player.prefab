@@ -144,6 +144,7 @@ GameObject:
   - component: {fileID: 8676574031023370719}
   - component: {fileID: 4864093045996530909}
   - component: {fileID: 1485456824245579529}
+  - component: {fileID: 4290094394221918034}
   m_Layer: 0
   m_Name: Abilities
   m_TagString: Untagged
@@ -260,6 +261,24 @@ MonoBehaviour:
   _cameraTarget: {fileID: 1018378976273471808}
   _offsetFromTop: 0.2
   _transitionSpeed: 10
+--- !u!114 &4290094394221918034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 857717295353528872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e81e3df7c6a5bbb41862f5fa8258ec10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.LadderClimbAbility
+  _idProvider: {fileID: 8825438807156420563}
+  _detectionRadius: 1
+  _ladderLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  _anchoringDuration: 0.2
 --- !u!1 &6184657420356467643
 GameObject:
   m_ObjectHideFlags: 0
@@ -274,6 +293,7 @@ GameObject:
   - component: {fileID: 2327802432577236121}
   - component: {fileID: 1276722818335488271}
   - component: {fileID: 2406909062950467209}
+  - component: {fileID: 5206011951597692597}
   m_Layer: 0
   m_Name: Drivers
   m_TagString: Untagged
@@ -324,6 +344,7 @@ MonoBehaviour:
   _bodyRotation: {fileID: 1428942243432692868}
   _panTilt: {fileID: 1826488379703311475}
   _idProvider: {fileID: 8825438807156420563}
+  _ladderClimb: {fileID: 4290094394221918034}
 --- !u!114 &2327802432577236121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,6 +385,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerSprintDriver
   _ability: {fileID: 4864093045996530909}
+--- !u!114 &5206011951597692597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6184657420356467643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4653dab4e17711644a04900f55e79f14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerLadderDriver
+  _ladderAbility: {fileID: 4290094394221918034}
 --- !u!1 &8779080779179642673
 GameObject:
   m_ObjectHideFlags: 0
@@ -436,6 +470,7 @@ MonoBehaviour:
   - {fileID: 4950390805051628401}
   - {fileID: 8676574031023370719}
   - {fileID: 4864093045996530909}
+  - {fileID: 4290094394221918034}
 --- !u!114 &345277474893362279
 MonoBehaviour:
   m_ObjectHideFlags: 0

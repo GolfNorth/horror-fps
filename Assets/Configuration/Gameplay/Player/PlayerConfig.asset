@@ -21,6 +21,7 @@ MonoBehaviour:
   - rid: 6440899049025700387
   - rid: 6440899049025700388
   - rid: 6440899076987027550
+  - rid: 6440899076987027597
   references:
     version: 2
     RefIds:
@@ -71,3 +72,16 @@ MonoBehaviour:
         _verticalSensitivity: 1
         _minPitch: -89
         _maxPitch: 75
+    - rid: 6440899076987027597
+      type: {class: LadderSection, ns: Game.Gameplay.Character.Configs.Sections, asm: Game.Gameplay}
+      data:
+        _climbSpeed: 3
+        _attachDistance: 0.5
+        _detachJumpForce: 5
+        _topExitOffset: 0.5
+        _maxLookYawDeviation: 60
+        _detectionRadius: 1
+        _anchoringDuration: 0.2
+        _edgeThreshold: 0.05
+        _snapStrength: 0.5
+        _topExitHeightOffset: 0.1

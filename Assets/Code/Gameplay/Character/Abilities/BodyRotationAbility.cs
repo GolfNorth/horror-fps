@@ -9,12 +9,22 @@ namespace Game.Gameplay.Character.Abilities
 
         private float _targetYaw;
 
-        public float TargetYaw => _targetYaw;
+        public float TargetYaw
+        {
+            get => _targetYaw;
+            set => _targetYaw = value;
+        }
 
-        public void SetTargetYaw(float yaw)
+        public void AddYaw(float delta)
+        {
+            _targetYaw += delta;
+        }
+
+        public void SetYawImmediate(float yaw)
         {
             _targetYaw = yaw;
         }
+
 
         public override bool UpdateRotation(
             KinematicCharacterMotor motor,
