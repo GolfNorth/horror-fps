@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Game.Core.Configuration;
@@ -6,30 +5,22 @@ using Game.Infrastructure.Assets;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using VContainer;
-using VContainer.Unity;
 
 namespace Game.Gameplay.Character.Factory
 {
     /// <summary>
     /// Factory that creates characters from prefabs with CharacterScope.
-    /// Loads prefabs via Addressables based on character ID from config.
+    /// Uses Addressables InstantiateAsync for proper reference counting.
     /// Config keys: {characterId}.prefab
     /// </summary>
     public sealed class CharacterFactory : ICharacterFactory
     {
-        private readonly LifetimeScope _parentScope;
         private readonly IAssetLoader _assetLoader;
         private readonly IConfigService _config;
-        private readonly Dictionary<string, GameObject> _prefabCache = new();
-        private readonly Dictionary<GameObject, CharacterScope> _instances = new();
 
         [Inject]
-        public CharacterFactory(
-            LifetimeScope parentScope,
-            IAssetLoader assetLoader,
-            IConfigService config)
+        public CharacterFactory(IAssetLoader assetLoader, IConfigService config)
         {
-            _parentScope = parentScope;
             _assetLoader = assetLoader;
             _config = config;
         }
@@ -40,32 +31,6 @@ namespace Game.Gameplay.Character.Factory
             Quaternion rotation,
             CancellationToken cancellation = default)
         {
-            var prefab = await GetOrLoadPrefabAsync(characterId, cancellation);
-            if (prefab == null)
-            {
-                return null;
-            }
-
-            return Instantiate(prefab, position, rotation);
-        }
-
-        public void Destroy(GameObject character)
-        {
-            if (character == null) return;
-
-            _instances.Remove(character, out _);
-            Object.Destroy(character);
-        }
-
-        private async UniTask<GameObject> GetOrLoadPrefabAsync(
-            string characterId,
-            CancellationToken cancellation)
-        {
-            if (_prefabCache.TryGetValue(characterId, out var cached))
-            {
-                return cached;
-            }
-
             var key = $"factory.{characterId}.prefab";
             if (!_config.HasKey(key))
             {
@@ -80,35 +45,28 @@ namespace Game.Gameplay.Character.Factory
                 return null;
             }
 
-            var prefab = await _assetLoader.LoadAsync<GameObject>(reference, cancellation);
-            if (prefab == null)
+            var instance = await _assetLoader.InstantiateAsync(reference, position, rotation, null, cancellation);
+            if (instance == null)
             {
-                Debug.LogError($"Failed to load prefab for character: {characterId}");
+                Debug.LogError($"Failed to instantiate character: {characterId}");
                 return null;
             }
 
-            if (prefab.GetComponent<CharacterScope>() == null)
+            if (instance.GetComponent<CharacterScope>() == null)
             {
-                Debug.LogError($"Character prefab '{prefab.name}' must have CharacterScope component");
+                Debug.LogError($"Character prefab '{instance.name}' must have CharacterScope component");
+                _assetLoader.ReleaseInstance(instance);
                 return null;
             }
 
-            _prefabCache[characterId] = prefab;
-            return prefab;
+            return instance;
         }
 
-        private GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation)
+        public void Destroy(GameObject character)
         {
-            using (LifetimeScope.EnqueueParent(_parentScope))
-            {
-                var instance = Object.Instantiate(prefab, position, rotation);
-                var scope = instance.GetComponent<CharacterScope>();
+            if (character == null) return;
 
-                scope.Container.InjectGameObject(instance);
-                _instances[instance] = scope;
-
-                return instance;
-            }
+            _assetLoader.ReleaseInstance(character);
         }
     }
 }

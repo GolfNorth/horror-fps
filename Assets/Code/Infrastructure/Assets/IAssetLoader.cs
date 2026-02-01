@@ -31,5 +31,22 @@ namespace Game.Infrastructure.Assets
         /// Preload multiple assets.
         /// </summary>
         UniTask PreloadAsync(string[] addresses, CancellationToken cancellation = default);
+
+        /// <summary>
+        /// Instantiate a GameObject from AssetReference.
+        /// Uses Addressables reference counting.
+        /// </summary>
+        UniTask<GameObject> InstantiateAsync(
+            AssetReference reference,
+            Vector3 position,
+            Quaternion rotation,
+            Transform parent = null,
+            CancellationToken cancellation = default);
+
+        /// <summary>
+        /// Release an instantiated GameObject.
+        /// Decrements reference count and destroys the instance.
+        /// </summary>
+        void ReleaseInstance(GameObject instance);
     }
 }

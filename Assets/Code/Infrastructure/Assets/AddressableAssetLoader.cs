@@ -79,5 +79,31 @@ namespace Game.Infrastructure.Assets
 
             await UniTask.WhenAll(tasks);
         }
+
+        public async UniTask<GameObject> InstantiateAsync(
+            AssetReference reference,
+            Vector3 position,
+            Quaternion rotation,
+            Transform parent = null,
+            CancellationToken cancellation = default)
+        {
+            var handle = Addressables.InstantiateAsync(reference, position, rotation, parent);
+            await handle.ToUniTask(cancellationToken: cancellation);
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                return handle.Result;
+            }
+
+            _log.Error(LogTag, $"Failed to instantiate asset reference: {reference.RuntimeKey}");
+            return null;
+        }
+
+        public void ReleaseInstance(GameObject instance)
+        {
+            if (instance == null) return;
+
+            Addressables.ReleaseInstance(instance);
+        }
     }
 }
