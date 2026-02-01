@@ -1,7 +1,6 @@
-using Game.Gameplay.Character.Factory;
-using Game.Gameplay.Player.Factory;
-using Game.Infrastructure.Assets;
-using Game.Infrastructure.SceneManagement;
+using Game.Core.Configuration;
+using Game.Core.Modules;
+using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -13,22 +12,43 @@ namespace Game.Gameplay
     /// </summary>
     public sealed class GameplayScope : LifetimeScope
     {
+        [Header("Configuration")]
+        [SerializeField] private ConfigSource[] _configSources;
+
+        [Header("Services")]
+        [SerializeField] private ServicesModule[] _serviceModules;
+
         protected override void Configure(IContainerBuilder builder)
         {
-            RegisterInfrastructureServices(builder);
-            RegisterFactories(builder);
+            RegisterConfigSources(builder);
+            RegisterServiceModules(builder);
         }
 
-        private static void RegisterInfrastructureServices(IContainerBuilder builder)
+        private void RegisterConfigSources(IContainerBuilder builder)
         {
-            builder.Register<IAssetLoader, AddressableAssetLoader>(Lifetime.Scoped);
-            builder.Register<ISceneLoader, SceneLoader>(Lifetime.Scoped);
+            if (_configSources == null || _configSources.Length == 0) return;
+
+            builder.RegisterBuildCallback(container =>
+            {
+                var registry = container.Resolve<ConfigRegistry>();
+                foreach (var source in _configSources)
+                {
+                    if (source != null)
+                    {
+                        registry.RegisterSource(source);
+                    }
+                }
+            });
         }
 
-        private static void RegisterFactories(IContainerBuilder builder)
+        private void RegisterServiceModules(IContainerBuilder builder)
         {
-            builder.Register<CharacterFactory>(Lifetime.Scoped).As<ICharacterFactory>();
-            builder.Register<PlayerFactory>(Lifetime.Scoped).As<IPlayerFactory>();
+            if (_serviceModules == null) return;
+
+            foreach (var module in _serviceModules)
+            {
+                module?.Configure(builder);
+            }
         }
     }
 }

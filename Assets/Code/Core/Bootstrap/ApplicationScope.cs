@@ -1,10 +1,8 @@
 using Game.Core.Configuration;
-using Game.Core.Coroutines;
 using Game.Core.Events;
-using Game.Core.Logging;
-using Game.Core.Ticking;
-using Game.Core.Time;
+using Game.Core.Modules;
 using MessagePipe;
+using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -16,19 +14,25 @@ namespace Game.Core.Bootstrap
     /// </summary>
     public sealed class ApplicationScope : LifetimeScope
     {
+        [Header("Configuration")]
+        [SerializeField] private ConfigSource[] _configSources;
+
+        [Header("Services")]
+        [SerializeField] private ServicesModule[] _serviceModules;
+
         protected override void Configure(IContainerBuilder builder)
         {
-            var options = builder.RegisterMessagePipe();
-
-            builder.RegisterBuildCallback(c => GlobalMessagePipe.SetProvider(c.AsServiceProvider()));
-
-            RegisterMessageBrokers(builder, options);
-            RegisterCoreServices(builder);
+            RegisterMessagePipe(builder);
+            RegisterConfigServices(builder);
+            RegisterServiceModules(builder);
             RegisterEntryPoints(builder);
         }
 
-        private static void RegisterMessageBrokers(IContainerBuilder builder, MessagePipeOptions options)
+        private static void RegisterMessagePipe(IContainerBuilder builder)
         {
+            var options = builder.RegisterMessagePipe();
+            builder.RegisterBuildCallback(c => GlobalMessagePipe.SetProvider(c.AsServiceProvider()));
+
             builder.RegisterMessageBroker<GameStateChangedEvent>(options);
             builder.RegisterMessageBroker<PauseStateChangedEvent>(options);
 
@@ -44,34 +48,42 @@ namespace Game.Core.Bootstrap
             builder.RegisterMessageBroker<UIVisibilityChangedEvent>(options);
         }
 
-        private static void RegisterCoreServices(IContainerBuilder builder)
-        {
-            builder.Register<UnityLogService>(Lifetime.Singleton).As<ILogService>();
-            builder.Register<GameTimeService>(Lifetime.Singleton).AsImplementedInterfaces();
-
-            builder.RegisterComponentOnNewGameObject<CoroutineRunner>(
-                Lifetime.Singleton,
-                "CoroutineRunner"
-            ).As<ICoroutineRunner>();
-
-            builder.RegisterComponentOnNewGameObject<TickService>(
-                Lifetime.Singleton,
-                "TickService"
-            ).As<ITickService>();
-
-            RegisterConfigServices(builder);
-        }
-
-        private static void RegisterConfigServices(IContainerBuilder builder)
+        private void RegisterConfigServices(IContainerBuilder builder)
         {
             builder.Register<ConfigRegistry>(Lifetime.Singleton);
             builder.Register<ConfigService>(Lifetime.Singleton).As<IConfigService>().AsSelf();
 
             builder.RegisterBuildCallback(container =>
             {
+                var registry = container.Resolve<ConfigRegistry>();
+                RegisterConfigSources(registry);
+
                 var configService = container.Resolve<ConfigService>();
                 ConfigServiceLocator.SetInstance(configService);
             });
+        }
+
+        private void RegisterConfigSources(ConfigRegistry registry)
+        {
+            if (_configSources == null) return;
+
+            foreach (var source in _configSources)
+            {
+                if (source != null)
+                {
+                    registry.RegisterSource(source);
+                }
+            }
+        }
+
+        private void RegisterServiceModules(IContainerBuilder builder)
+        {
+            if (_serviceModules == null) return;
+
+            foreach (var module in _serviceModules)
+            {
+                module?.Configure(builder);
+            }
         }
 
         private static void RegisterEntryPoints(IContainerBuilder builder)

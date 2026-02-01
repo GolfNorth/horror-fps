@@ -151,7 +151,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2576092427428615212
 Transform:
   m_ObjectHideFlags: 0
@@ -191,7 +191,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbf23d5f937e6f9458301936dbe037a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.GroundMoveAbility
-  _idProvider: {fileID: 8825438807156420563}
 --- !u!114 &8986426271275114202
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,7 +203,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdd9a93c342bb9c47bb871d003417dfb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.GravityAbility
-  _idProvider: {fileID: 8825438807156420563}
 --- !u!114 &4950390805051628401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,7 +215,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0984d233afd3c04c89d074e2e845c4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.JumpAbility
-  _idProvider: {fileID: 8825438807156420563}
 --- !u!114 &8676574031023370719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -230,7 +227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e4f6d800f93b52458db42ae0d2e095b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.CrouchAbility
-  _idProvider: {fileID: 8825438807156420563}
   _meshRoot: {fileID: 0}
 --- !u!114 &4864093045996530909
 MonoBehaviour:
@@ -244,7 +240,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da8418061b8de2a47950e1595b4fc6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.SprintAbility
-  _idProvider: {fileID: 8825438807156420563}
 --- !u!114 &1485456824245579529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -273,12 +268,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e81e3df7c6a5bbb41862f5fa8258ec10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.LadderClimbAbility
-  _idProvider: {fileID: 8825438807156420563}
-  _detectionRadius: 1
   _ladderLayer:
     serializedVersion: 2
     m_Bits: 64
-  _anchoringDuration: 0.2
 --- !u!1 &6184657420356467643
 GameObject:
   m_ObjectHideFlags: 0
@@ -288,11 +280,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5545946719315596863}
-  - component: {fileID: 2568926390300694108}
   - component: {fileID: 483045566712499429}
-  - component: {fileID: 2327802432577236121}
   - component: {fileID: 1276722818335488271}
-  - component: {fileID: 2406909062950467209}
   - component: {fileID: 5206011951597692597}
   m_Layer: 0
   m_Name: Drivers
@@ -300,7 +289,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5545946719315596863
 Transform:
   m_ObjectHideFlags: 0
@@ -316,19 +305,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5545819074987112309}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2568926390300694108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6184657420356467643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd480918f61ccef4a96e4b36fde59cb4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerJumpDriver
-  _ability: {fileID: 4950390805051628401}
 --- !u!114 &483045566712499429
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -343,22 +319,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerLookDriver
   _bodyRotation: {fileID: 1428942243432692868}
   _panTilt: {fileID: 1826488379703311475}
-  _idProvider: {fileID: 8825438807156420563}
   _ladderClimb: {fileID: 4290094394221918034}
---- !u!114 &2327802432577236121
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6184657420356467643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bda6c7cf21a275e4bb144d7e61b56336, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerMoveDriver
-  _ability: {fileID: 6638133840712739512}
-  _cameraTransform: {fileID: 1018378976273471808}
 --- !u!114 &1276722818335488271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,19 +333,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerCrouchDriver
   _ability: {fileID: 8676574031023370719}
---- !u!114 &2406909062950467209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6184657420356467643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88830c6047c440547b6595eff9c03edc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerSprintDriver
-  _ability: {fileID: 4864093045996530909}
 --- !u!114 &5206011951597692597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,8 +355,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5545819074987112309}
-  - component: {fileID: 8825438807156420563}
-  - component: {fileID: 8325350233768600633}
   - component: {fileID: 345277474893362279}
   - component: {fileID: 5643302511508133276}
   - component: {fileID: 5185984756196135036}
@@ -437,40 +383,6 @@ Transform:
   - {fileID: 1018378976273471808}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8825438807156420563
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8779080779179642673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 916134ec3b98c274386d8a513eac06d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.CharacterIdProvider
-  _characterId: player
---- !u!114 &8325350233768600633
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8779080779179642673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6b3c7eb2f3cd7e46baea71ff9b81486, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Motor.CharacterMotor
-  _motor: {fileID: 345277474893362279}
-  _abilities:
-  - {fileID: 1428942243432692868}
-  - {fileID: 6638133840712739512}
-  - {fileID: 8986426271275114202}
-  - {fileID: 4950390805051628401}
-  - {fileID: 8676574031023370719}
-  - {fileID: 4864093045996530909}
-  - {fileID: 4290094394221918034}
 --- !u!114 &345277474893362279
 MonoBehaviour:
   m_ObjectHideFlags: 0

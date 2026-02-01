@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6901629496054386120}
   - component: {fileID: 5208687054687438154}
-  - component: {fileID: 6447674399523548235}
   m_Layer: 0
   m_Name: ApplicationScope
   m_TagString: Untagged
@@ -48,20 +47,12 @@ MonoBehaviour:
   parentReference:
     TypeName: 
   autoRun: 1
-  autoInjectGameObjects:
-  - {fileID: 658189553443792699}
---- !u!114 &6447674399523548235
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 658189553443792699}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: daf8bd5d547cdee40bf01962efc9cc34, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Core::Game.Core.Configuration.ConfigLoader
-  _sources:
+  autoInjectGameObjects: []
+  _configSources:
   - {fileID: 11400000, guid: 01f8d0096cba38a47b42b896d805064a, type: 2}
-  - {fileID: 11400000, guid: 72090f11e2ea6864b931d2e11a71b59b, type: 2}
+  _serviceModules:
+  - {fileID: 11400000, guid: daf9a7cb914b92d4bbc42caf1a18fe27, type: 2}
+  - {fileID: 11400000, guid: 72089022751ff304689bd8076f1880dd, type: 2}
+  - {fileID: 11400000, guid: 00ee3ea4810bf054b8b66189f8fb71a0, type: 2}
+  - {fileID: 11400000, guid: 23d11bfc6a9677e40b2bde63fab7892e, type: 2}
+  - {fileID: 11400000, guid: 2e554b6a3e7de1843bb1c67d1290949d, type: 2}

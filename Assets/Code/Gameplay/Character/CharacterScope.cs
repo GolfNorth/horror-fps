@@ -15,6 +15,9 @@ namespace Game.Gameplay.Character
         [Header("Identity")]
         [SerializeField] private string _characterId = "player";
 
+        [Header("Configuration")]
+        [SerializeField] private ConfigSource[] _configSources;
+
         [Header("Services")]
         [SerializeField] private ServicesModule[] _serviceModules;
 
@@ -36,8 +39,23 @@ namespace Game.Gameplay.Character
             builder.RegisterInstance(_info);
             builder.RegisterInstance(_context);
 
+            RegisterConfigSources();
             RegisterScopedConfig(builder);
             RegisterServiceModules(builder);
+        }
+
+        private void RegisterConfigSources()
+        {
+            if (_configSources == null || _configSources.Length == 0) return;
+
+            var registry = Parent.Container.Resolve<ConfigRegistry>();
+            foreach (var source in _configSources)
+            {
+                if (source != null)
+                {
+                    registry.RegisterSource(source);
+                }
+            }
         }
 
         private void RegisterScopedConfig(IContainerBuilder builder)
