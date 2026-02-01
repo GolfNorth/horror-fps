@@ -48,5 +48,7 @@ MonoBehaviour:
     TypeName: Game.Core.Bootstrap.ApplicationScope
   autoRun: 1
   autoInjectGameObjects: []
-  _configSources: []
-  _serviceModules: []
+  _configSources:
+  - {fileID: 11400000, guid: 9e8aa75aef0c90544bfa36f5e11e3602, type: 2}
+  _serviceModules:
+  - {fileID: 11400000, guid: 0c49260a5f744ce41846d84c35353318, type: 2}

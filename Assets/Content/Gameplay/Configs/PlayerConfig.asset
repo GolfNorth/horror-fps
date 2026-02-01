@@ -14,20 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Core::Game.Core.Configuration.ConfigSource
   _rootKey: player
   _sections:
-  - rid: 6440899049025700383
   - rid: 6440899076987027550
   references:
     version: 2
     RefIds:
-    - rid: 6440899049025700383
-      type: {class: PlayerFactorySection, ns: Game.Gameplay.Player.Factory, asm: Game.Gameplay}
-      data:
-        _prefab:
-          m_AssetGUID: c854d9dbec717c1459891851a4d3d030
-          m_SubObjectName: 
-          m_SubObjectType: 
-          m_SubObjectGUID: 
-          m_EditorAssetChanged: 1
     - rid: 6440899076987027550
       type: {class: LookSection, ns: Game.Gameplay.Player.Configs.Sections, asm: Game.Gameplay}
       data:
