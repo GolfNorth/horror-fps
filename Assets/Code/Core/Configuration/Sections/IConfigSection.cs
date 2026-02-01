@@ -1,8 +1,7 @@
 namespace Game.Core.Configuration
 {
-    public interface IConfigSection
+    public interface IConfigSection : IDisplayName
     {
         string Key { get; }
-        string DisplayName { get; }
     }
 }

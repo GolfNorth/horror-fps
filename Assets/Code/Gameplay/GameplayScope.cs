@@ -1,5 +1,5 @@
+using Game.Gameplay.Character.Factory;
 using Game.Gameplay.Player.Factory;
-using Game.Gameplay.Player.Input;
 using Game.Infrastructure.Assets;
 using Game.Infrastructure.SceneManagement;
 using VContainer;
@@ -16,8 +16,7 @@ namespace Game.Gameplay
         protected override void Configure(IContainerBuilder builder)
         {
             RegisterInfrastructureServices(builder);
-            RegisterInputServices(builder);
-            RegisterPlayerFactory(builder);
+            RegisterFactories(builder);
         }
 
         private static void RegisterInfrastructureServices(IContainerBuilder builder)
@@ -26,13 +25,9 @@ namespace Game.Gameplay
             builder.Register<ISceneLoader, SceneLoader>(Lifetime.Scoped);
         }
 
-        private static void RegisterInputServices(IContainerBuilder builder)
+        private static void RegisterFactories(IContainerBuilder builder)
         {
-            builder.Register<PlayerInputService>(Lifetime.Scoped).AsImplementedInterfaces();
-        }
-
-        private static void RegisterPlayerFactory(IContainerBuilder builder)
-        {
+            builder.Register<CharacterFactory>(Lifetime.Scoped).As<ICharacterFactory>();
             builder.Register<PlayerFactory>(Lifetime.Scoped).As<IPlayerFactory>();
         }
     }
