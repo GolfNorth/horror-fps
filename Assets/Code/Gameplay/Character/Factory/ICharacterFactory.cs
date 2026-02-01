@@ -6,20 +6,20 @@ namespace Game.Gameplay.Character.Factory
 {
     /// <summary>
     /// Factory for creating characters from prefabs with CharacterScope.
+    /// Loads prefabs via Addressables based on character ID from config.
     /// </summary>
     public interface ICharacterFactory
     {
         /// <summary>
-        /// Creates a character from prefab at the given position.
-        /// Prefab must have CharacterScope component configured.
+        /// Creates a character by ID. Loads prefab via Addressables from config.
         /// </summary>
-        /// <param name="prefab">Character prefab with CharacterScope</param>
+        /// <param name="characterId">Character ID defined in CharacterPrefabsSection</param>
         /// <param name="position">Spawn position</param>
         /// <param name="rotation">Spawn rotation</param>
         /// <param name="cancellation">Cancellation token</param>
         /// <returns>Created character's root GameObject</returns>
         UniTask<GameObject> CreateAsync(
-            GameObject prefab,
+            string characterId,
             Vector3 position,
             Quaternion rotation,
             CancellationToken cancellation = default);

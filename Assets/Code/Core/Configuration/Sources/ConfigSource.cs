@@ -14,7 +14,6 @@ namespace Game.Core.Configuration
 
         [SerializeReference]
         [ValueDropdown("GetAllSections")]
-        [ListDrawerSettings(ListElementLabelName = "DisplayName")]
         private IConfigSection[] _sections = Array.Empty<IConfigSection>();
 
         public string RootKey => _rootKey;

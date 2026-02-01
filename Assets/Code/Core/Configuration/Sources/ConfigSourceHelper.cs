@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Sirenix.OdinInspector;
+using UnityEditor;
 
 namespace Game.Core.Configuration
 {
@@ -12,6 +13,12 @@ namespace Game.Core.Configuration
     {
         private static List<ValueDropdownItem<IConfigSection>> _cachedItems;
         private static bool _initialized;
+
+        [InitializeOnLoadMethod]
+        private static void OnAssemblyReload()
+        {
+            ClearCache();
+        }
 
         public static IEnumerable GetAllSections()
         {
@@ -66,7 +73,7 @@ namespace Game.Core.Configuration
             _cachedItems = _cachedItems.OrderBy(x => x.Text).ToList();
         }
 
-        public static void ClearCache()
+        private static void ClearCache()
         {
             _cachedItems = null;
             _initialized = false;
