@@ -1,7 +1,7 @@
 using System;
 using Game.Core.Logging;
+using Game.Gameplay.Player.Input.Intents;
 using Game.Input;
-using R3;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -9,76 +9,102 @@ using VContainer.Unity;
 namespace Game.Gameplay.Player.Input
 {
     /// <summary>
-    /// Wraps Unity Input System and exposes player intent as observable streams.
+    /// Reads Unity Input System and writes intents to buffer.
     /// </summary>
-    public sealed class PlayerInputService : IPlayerInput, IInitializable, IDisposable
+    public sealed class PlayerInputService : IPlayerInput, ITickable, IInitializable, IDisposable
     {
         private const string LogTag = "PlayerInput";
 
         private readonly ILogService _log;
-        private readonly CompositeDisposable _disposables = new();
+        private readonly IIntentBuffer _buffer;
         private InputSystem_Actions _inputActions;
+        private bool _isEnabled;
 
-        private readonly Subject<Unit> _jumpSubject = new();
-        private readonly Subject<Unit> _attackSubject = new();
-        private readonly Subject<Unit> _interactSubject = new();
-        private readonly Subject<int> _weaponSwitchSubject = new();
-        private readonly Subject<bool> _crouchSubject = new();
-
-        public Vector2 MoveInput => _inputActions?.Player.Move.ReadValue<Vector2>() ?? Vector2.zero;
-        public Vector2 LookInput => _inputActions?.Player.Look.ReadValue<Vector2>() ?? Vector2.zero;
-        public bool IsSprinting => _inputActions?.Player.Sprint.IsPressed() ?? false;
-        public bool IsCrouching => _inputActions?.Player.Crouch.IsPressed() ?? false;
-
-        public Observable<Unit> OnJump => _jumpSubject;
-        public Observable<Unit> OnAttack => _attackSubject;
-        public Observable<Unit> OnInteract => _interactSubject;
-        public Observable<int> OnWeaponSwitch => _weaponSwitchSubject;
-        public Observable<bool> IsCrouchingChanged => _crouchSubject;
+        public bool IsEnabled => _isEnabled;
 
         [Inject]
-        public PlayerInputService(ILogService log)
+        public PlayerInputService(ILogService log, IIntentBuffer buffer)
         {
             _log = log;
+            _buffer = buffer;
         }
 
         public void Initialize()
         {
             _inputActions = new InputSystem_Actions();
             _inputActions.Enable();
+            _isEnabled = true;
 
-            _inputActions.Player.Jump.performed += _ => _jumpSubject.OnNext(Unit.Default);
-            _inputActions.Player.Attack.performed += _ => _attackSubject.OnNext(Unit.Default);
-            _inputActions.Player.Interact.performed += _ => _interactSubject.OnNext(Unit.Default);
-            _inputActions.Player.Previous.performed += _ => _weaponSwitchSubject.OnNext(-1);
-            _inputActions.Player.Next.performed += _ => _weaponSwitchSubject.OnNext(1);
-            _inputActions.Player.Crouch.started += _ => _crouchSubject.OnNext(true);
-            _inputActions.Player.Crouch.canceled += _ => _crouchSubject.OnNext(false);
+            SubscribeToEvents();
 
             _log.Info(LogTag, "Initialized");
         }
 
-        public void EnableGameplayInput()
+        public void Tick()
         {
-            _inputActions?.Player.Enable();
+            if (!_isEnabled) return;
+
+            UpdateContinuousIntents();
         }
 
-        public void DisableGameplayInput()
+        public void Enable()
+        {
+            _inputActions?.Player.Enable();
+            _isEnabled = true;
+        }
+
+        public void Disable()
         {
             _inputActions?.Player.Disable();
+            _buffer.Clear();
+            _isEnabled = false;
         }
 
         public void Dispose()
         {
-            _jumpSubject.Dispose();
-            _attackSubject.Dispose();
-            _interactSubject.Dispose();
-            _weaponSwitchSubject.Dispose();
-            _crouchSubject.Dispose();
-            _disposables.Dispose();
-
             _inputActions?.Disable();
             _inputActions?.Dispose();
+        }
+
+        private void SubscribeToEvents()
+        {
+            _inputActions.Player.Jump.performed += _ => _buffer.Set(new JumpIntent());
+            _inputActions.Player.Jump.canceled += _ => _buffer.Remove<JumpIntent>();
+
+            _inputActions.Player.Attack.performed += _ => _buffer.Set(new AttackIntent());
+            _inputActions.Player.Attack.canceled += _ => _buffer.Remove<AttackIntent>();
+
+            _inputActions.Player.Interact.performed += _ => _buffer.Set(new InteractIntent());
+            _inputActions.Player.Interact.canceled += _ => _buffer.Remove<InteractIntent>();
+
+            _inputActions.Player.Sprint.started += _ => _buffer.Set(new SprintIntent());
+            _inputActions.Player.Sprint.canceled += _ => _buffer.Remove<SprintIntent>();
+
+            _inputActions.Player.Crouch.started += _ => _buffer.Set(new CrouchIntent());
+            _inputActions.Player.Crouch.canceled += _ => _buffer.Remove<CrouchIntent>();
+        }
+
+        private void UpdateContinuousIntents()
+        {
+            var moveInput = _inputActions.Player.Move.ReadValue<Vector2>();
+            if (moveInput != Vector2.zero)
+            {
+                _buffer.Set(new MoveIntent(moveInput));
+            }
+            else
+            {
+                _buffer.Remove<MoveIntent>();
+            }
+
+            var lookInput = _inputActions.Player.Look.ReadValue<Vector2>();
+            if (lookInput != Vector2.zero)
+            {
+                _buffer.Set(new LookIntent(lookInput));
+            }
+            else
+            {
+                _buffer.Remove<LookIntent>();
+            }
         }
     }
 }

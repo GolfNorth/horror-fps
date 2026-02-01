@@ -1,6 +1,7 @@
 using Game.Core.Modules;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Player.Input
 {
@@ -11,7 +12,8 @@ namespace Game.Gameplay.Player.Input
     {
         public override void Configure(IContainerBuilder builder)
         {
-            builder.Register<PlayerInputService>(Lifetime.Scoped).As<IPlayerInput>();
+            builder.Register<IntentBuffer>(Lifetime.Scoped).As<IIntentBuffer>();
+            builder.RegisterEntryPoint<PlayerInputService>().As<IPlayerInput>();
         }
     }
 }
