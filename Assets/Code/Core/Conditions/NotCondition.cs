@@ -1,18 +1,25 @@
+using System;
+using UnityEngine;
+using VContainer;
+
 namespace Game.Core.Conditions
 {
+    [Serializable]
     public class NotCondition : ICondition
     {
-        private readonly ICondition _condition;
+        [SerializeReference] private ICondition _condition;
 
-        public NotCondition(ICondition condition)
+        public void Bind(IObjectResolver resolver)
         {
-            _condition = condition;
+            _condition?.Bind(resolver);
         }
 
-        public bool IsSatisfied() => !_condition.IsSatisfied();
+        public bool IsSatisfied() => _condition != null && !_condition.IsSatisfied();
 
 #if UNITY_EDITOR
-        public string DisplayName => $"Not ({_condition.DisplayName})";
+        public string DisplayName => _condition != null
+            ? $"Not ({_condition.DisplayName})"
+            : "Not (empty)";
 #endif
     }
 }

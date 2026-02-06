@@ -1,21 +1,24 @@
-using Game.Core;
+using System;
 using Game.Core.Conditions;
 using Game.Gameplay.Character.Resources;
+using UnityEngine;
+using VContainer;
 
 namespace Game.Gameplay.Character.Conditions
 {
+    [Serializable]
     public class HasResourceCondition : ICondition
     {
-        private readonly SimpleResource _resource;
-        private readonly float _minAmount;
+        [SerializeField] private float _minAmount = 1f;
 
-        public HasResourceCondition(SimpleResource resource, float minAmount)
+        [NonSerialized] private SimpleResource _resource;
+
+        public void Bind(IObjectResolver resolver)
         {
-            _resource = resource;
-            _minAmount = minAmount;
+            _resource = resolver.Resolve<SimpleResource>();
         }
 
-        public bool IsSatisfied() => _resource.CanConsume(_minAmount);
+        public bool IsSatisfied() => _resource != null && _resource.CanConsume(_minAmount);
 
 #if UNITY_EDITOR
         public string DisplayName => $"Has Resource (>= {_minAmount})";

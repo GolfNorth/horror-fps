@@ -17,7 +17,7 @@ namespace Game.Gameplay.Character
         {
             foreach (var condition in _conditions)
             {
-                if (!condition.IsSatisfied())
+                if (condition != null && !condition.IsSatisfied())
                     return false;
             }
 

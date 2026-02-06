@@ -1,22 +1,29 @@
+using System;
+using UnityEngine;
+using VContainer;
+
 namespace Game.Core.Conditions
 {
+    [Serializable]
     public class AllCondition : ICondition
     {
-        private readonly ICondition[] _conditions;
+        [SerializeReference] private ICondition[] _conditions;
 
-        public AllCondition(ICondition[] conditions)
+        public void Bind(IObjectResolver resolver)
         {
-            _conditions = conditions;
+            if (_conditions == null) return;
+            foreach (var condition in _conditions)
+                condition?.Bind(resolver);
         }
 
         public bool IsSatisfied()
         {
+            if (_conditions == null) return true;
             foreach (var condition in _conditions)
             {
-                if (!condition.IsSatisfied())
+                if (condition != null && !condition.IsSatisfied())
                     return false;
             }
-
             return true;
         }
 

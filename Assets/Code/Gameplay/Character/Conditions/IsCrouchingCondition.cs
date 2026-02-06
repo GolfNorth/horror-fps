@@ -1,18 +1,20 @@
-using Game.Core;
+using System;
 using Game.Core.Conditions;
+using VContainer;
 
 namespace Game.Gameplay.Character.Conditions
 {
+    [Serializable]
     public class IsCrouchingCondition : ICondition
     {
-        private readonly CharacterState _state;
+        [NonSerialized] private CharacterState _state;
 
-        public IsCrouchingCondition(CharacterState state)
+        public void Bind(IObjectResolver resolver)
         {
-            _state = state;
+            _state = resolver.Resolve<CharacterState>();
         }
 
-        public bool IsSatisfied() => _state.IsCrouching.Value;
+        public bool IsSatisfied() => _state != null && _state.IsCrouching.Value;
 
 #if UNITY_EDITOR
         public string DisplayName => "Is Crouching";
