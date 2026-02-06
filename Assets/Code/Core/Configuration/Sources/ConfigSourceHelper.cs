@@ -59,9 +59,9 @@ namespace Game.Core.Configuration
                             instance = (IConfigSection)Activator.CreateInstance(type);
                         }
 
-                        var displayName = instance.DisplayName ?? type.Name;
+                        var label = instance.Label ?? type.Name;
 
-                        _cachedItems.Add(new ValueDropdownItem<IConfigSection>(displayName, instance));
+                        _cachedItems.Add(new ValueDropdownItem<IConfigSection>(label, instance));
                     }
                 }
                 catch

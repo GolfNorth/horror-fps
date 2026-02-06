@@ -8,7 +8,7 @@ namespace Game.Gameplay.Character.Movement.Configs.Sections
     public struct CrouchSection : IConfigSection
     {
         public string Key => "crouch";
-        public string DisplayName => "Character/Crouch";
+        public string Label => "Character/Crouch";
 
         [ConfigKey("speed")]
         [SerializeField] private float _speed;

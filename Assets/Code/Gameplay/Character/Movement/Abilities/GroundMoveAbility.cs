@@ -1,4 +1,5 @@
 using Game.Core.Configuration;
+using Game.Core.Ticking;
 using Game.Gameplay.Character.Actions;
 using KinematicCharacterController;
 using UnityEngine;
@@ -48,6 +49,7 @@ namespace Game.Gameplay.Character.Movement.Abilities
             if (_actions.TryGet<MoveAction>(out var move))
             {
                 moveInput = new Vector3(move.Direction.x, 0f, move.Direction.y);
+                moveInput = motor.TransientRotation * moveInput;
                 moveInput = Vector3.ClampMagnitude(moveInput, 1f);
             }
 

@@ -17,7 +17,7 @@ namespace Game.Gameplay.Character.Conditions
         public bool IsSatisfied() => _state != null && _state.IsMoving.Value;
 
 #if UNITY_EDITOR
-        public string DisplayName => "Is Moving";
+        public string Label => "Is Moving";
 #endif
     }
 }

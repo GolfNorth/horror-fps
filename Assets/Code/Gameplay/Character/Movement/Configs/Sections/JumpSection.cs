@@ -8,7 +8,7 @@ namespace Game.Gameplay.Character.Movement.Configs.Sections
     public struct JumpSection : IConfigSection
     {
         public string Key => "jump";
-        public string DisplayName => "Character/Jump";
+        public string Label => "Character/Jump";
 
         [ConfigKey("force")]
         [SerializeField] private float _force;

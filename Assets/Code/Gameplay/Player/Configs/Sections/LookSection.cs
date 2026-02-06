@@ -8,7 +8,7 @@ namespace Game.Gameplay.Player.Configs.Sections
     public struct LookSection : IConfigSection
     {
         public string Key => "look";
-        public string DisplayName => "Player/Look";
+        public string Label => "Player/Look";
 
         [ConfigKey("horizontal_sensitivity")]
         [SerializeField] private float _horizontalSensitivity;

@@ -8,7 +8,7 @@ namespace Game.Core.Logging
     public struct LogSection : IConfigSection
     {
         public string Key => "log";
-        public string DisplayName => "Core/Logging";
+        public string Label => "Core/Logging";
 
         [ConfigKey("min_level")]
         [SerializeField] private LogLevel _minLevel;

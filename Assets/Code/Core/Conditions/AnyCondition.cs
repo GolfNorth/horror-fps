@@ -28,7 +28,7 @@ namespace Game.Core.Conditions
         }
 
 #if UNITY_EDITOR
-        public string DisplayName => "Any";
+        public string Label => "Any";
 #endif
     }
 }

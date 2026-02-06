@@ -1,5 +1,6 @@
 using System;
 using Game.Core.Conditions;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using VContainer;
 
@@ -7,6 +8,7 @@ namespace Game.Gameplay.Character
 {
     public abstract class ActionRuleAsset : ScriptableObject
     {
+        [ListDrawerSettings(ListElementLabelName = "Label"), HideReferenceObjectPicker]
         [SerializeReference] private ICondition[] _conditions;
 
         public IActionRule Build(IObjectResolver resolver)

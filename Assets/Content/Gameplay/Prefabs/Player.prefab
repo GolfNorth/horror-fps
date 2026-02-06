@@ -125,15 +125,16 @@ GameObject:
   - component: {fileID: 4950390805051628401}
   - component: {fileID: 8676574031023370719}
   - component: {fileID: 4864093045996530909}
-  - component: {fileID: 1485456824245579529}
   - component: {fileID: 4290094394221918034}
+  - component: {fileID: 1485456824245579529}
+  - component: {fileID: 2561430515863351154}
   m_Layer: 0
   m_Name: Abilities
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2576092427428615212
 Transform:
   m_ObjectHideFlags: 0
@@ -222,6 +223,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da8418061b8de2a47950e1595b4fc6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.SprintAbility
+--- !u!114 &4290094394221918034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 857717295353528872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e81e3df7c6a5bbb41862f5fa8258ec10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.LadderClimbAbility
+  _ladderLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &1485456824245579529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,7 +254,7 @@ MonoBehaviour:
   _cameraTarget: {fileID: 1018378976273471808}
   _offsetFromTop: 0.2
   _transitionSpeed: 10
---- !u!114 &4290094394221918034
+--- !u!114 &2561430515863351154
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -247,87 +263,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 857717295353528872}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e81e3df7c6a5bbb41862f5fa8258ec10, type: 3}
+  m_Script: {fileID: 11500000, guid: c023d24a62c8cd64f8494cc878c1364c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Abilities.LadderClimbAbility
-  _ladderLayer:
-    serializedVersion: 2
-    m_Bits: 64
---- !u!1 &6184657420356467643
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5545946719315596863}
-  - component: {fileID: 483045566712499429}
-  - component: {fileID: 1276722818335488271}
-  - component: {fileID: 5206011951597692597}
-  m_Layer: 0
-  m_Name: Drivers
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &5545946719315596863
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6184657420356467643}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5545819074987112309}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &483045566712499429
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6184657420356467643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c59f81abf855054185ab89546792a9f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerLookDriver
-  _bodyRotation: {fileID: 1428942243432692868}
+  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Movement.Abilities.CameraPitchAbility
   _panTilt: {fileID: 1826488379703311475}
-  _ladderClimb: {fileID: 4290094394221918034}
---- !u!114 &1276722818335488271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6184657420356467643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34a734824dea3d04fa0256d474a7b257, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerCrouchDriver
-  _ability: {fileID: 8676574031023370719}
---- !u!114 &5206011951597692597
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6184657420356467643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4653dab4e17711644a04900f55e79f14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Player.Drivers.PlayerLadderDriver
-  _ladderAbility: {fileID: 4290094394221918034}
 --- !u!1 &8779080779179642673
 GameObject:
   m_ObjectHideFlags: 0
@@ -338,10 +277,10 @@ GameObject:
   m_Component:
   - component: {fileID: 5545819074987112309}
   - component: {fileID: 5689879753757159671}
+  - component: {fileID: 6782548669612133199}
   - component: {fileID: 345277474893362279}
   - component: {fileID: 5643302511508133276}
   - component: {fileID: 5185984756196135036}
-  - component: {fileID: 6782548669612133199}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -362,7 +301,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5545946719315596863}
   - {fileID: 2576092427428615212}
   - {fileID: 1018378976273471808}
   m_Father: {fileID: 0}
@@ -382,12 +320,35 @@ MonoBehaviour:
   parentReference:
     TypeName: Game.Gameplay.GameplayScope
   autoRun: 1
-  autoInjectGameObjects: []
+  autoInjectGameObjects:
+  - {fileID: 8779080779179642673}
   _configSources:
   - {fileID: 11400000, guid: 72090f11e2ea6864b931d2e11a71b59b, type: 2}
   _serviceModules:
   - {fileID: 11400000, guid: bc6bece1f42b64f4db550992f9e33180, type: 2}
+  - {fileID: 11400000, guid: cea20ac8b36c87248a42fabb469c5221, type: 2}
   _characterId: player
+--- !u!114 &6782548669612133199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8779080779179642673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6b3c7eb2f3cd7e46baea71ff9b81486, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Movement.Motor.CharacterMotor
+  _motor: {fileID: 345277474893362279}
+  _abilities:
+  - {fileID: 1428942243432692868}
+  - {fileID: 6638133840712739512}
+  - {fileID: 8986426271275114202}
+  - {fileID: 4950390805051628401}
+  - {fileID: 8676574031023370719}
+  - {fileID: 4864093045996530909}
+  - {fileID: 4290094394221918034}
 --- !u!114 &345277474893362279
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -480,17 +441,3 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &6782548669612133199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8779080779179642673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6b3c7eb2f3cd7e46baea71ff9b81486, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Character.Movement.Motor.CharacterMotor
-  _motor: {fileID: 345277474893362279}
-  _abilities: []

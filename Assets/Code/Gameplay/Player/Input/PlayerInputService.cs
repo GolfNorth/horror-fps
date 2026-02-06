@@ -1,4 +1,5 @@
 using System;
+using Game.Core.Configuration;
 using Game.Core.Logging;
 using Game.Gameplay.Character.Intents;
 using Game.Input;
@@ -17,16 +18,20 @@ namespace Game.Gameplay.Player.Input
 
         private readonly ILogService _log;
         private readonly IIntentBuffer _buffer;
+        private readonly IConfigService _config;
         private InputSystem_Actions _inputActions;
+        private IConfigValue<float> _horizontalSensitivity;
+        private IConfigValue<float> _verticalSensitivity;
         private bool _isEnabled;
 
         public bool IsEnabled => _isEnabled;
 
         [Inject]
-        public PlayerInputService(ILogService log, IIntentBuffer buffer)
+        public PlayerInputService(ILogService log, IIntentBuffer buffer, IConfigService config)
         {
             _log = log;
             _buffer = buffer;
+            _config = config;
         }
 
         public void Initialize()
@@ -34,6 +39,9 @@ namespace Game.Gameplay.Player.Input
             _inputActions = new InputSystem_Actions();
             _inputActions.Enable();
             _isEnabled = true;
+
+            _horizontalSensitivity = _config.Observe<float>("look.horizontal_sensitivity");
+            _verticalSensitivity = _config.Observe<float>("look.vertical_sensitivity");
 
             SubscribeToEvents();
 
@@ -96,10 +104,13 @@ namespace Game.Gameplay.Player.Input
                 _buffer.Remove<MoveIntent>();
             }
 
-            var lookInput = _inputActions.Player.Look.ReadValue<Vector2>();
-            if (lookInput != Vector2.zero)
+            var lookRaw = _inputActions.Player.Look.ReadValue<Vector2>();
+            if (lookRaw != Vector2.zero)
             {
-                _buffer.Set(new LookIntent(lookInput));
+                var lookScaled = new Vector2(
+                    lookRaw.x * _horizontalSensitivity.Value,
+                    lookRaw.y * _verticalSensitivity.Value);
+                _buffer.Set(new LookIntent(lookScaled));
             }
             else
             {

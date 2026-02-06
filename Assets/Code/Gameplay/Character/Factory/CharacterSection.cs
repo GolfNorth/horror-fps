@@ -13,7 +13,7 @@ namespace Game.Gameplay.Character.Factory
     public struct CharacterSection : IConfigSection
     {
         public string Key => _id;
-        public string DisplayName => "Character/Prefab";
+        public string Label => "Character/Prefab";
 
         [SerializeField] private string _id;
 

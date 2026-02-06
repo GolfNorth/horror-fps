@@ -17,8 +17,8 @@ namespace Game.Core.Conditions
         public bool IsSatisfied() => _condition != null && !_condition.IsSatisfied();
 
 #if UNITY_EDITOR
-        public string DisplayName => _condition != null
-            ? $"Not ({_condition.DisplayName})"
+        public string Label => _condition != null
+            ? $"Not ({_condition.Label})"
             : "Not (empty)";
 #endif
     }

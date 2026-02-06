@@ -8,7 +8,7 @@ namespace Game.Gameplay.Character.Movement.Configs.Sections
     public struct SprintSection : IConfigSection
     {
         public string Key => "sprint";
-        public string DisplayName => "Character/Sprint";
+        public string Label => "Character/Sprint";
 
         [ConfigKey("speed")]
         [SerializeField] private float _speed;

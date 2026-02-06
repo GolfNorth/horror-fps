@@ -1,3 +1,5 @@
+using Game.Core.Ticking;
+using Game.Gameplay.Abilities;
 using KinematicCharacterController;
 using UnityEngine;
 
@@ -6,7 +8,7 @@ namespace Game.Gameplay.Character.Movement.Abilities
     /// <summary>
     /// Base class for movement abilities.
     /// </summary>
-    public abstract class MovementAbility : MonoBehaviour, IAbility
+    public abstract class MovementAbility : TickableBehaviour, IAbility
     {
         public abstract int Priority { get; }
 

@@ -17,7 +17,7 @@ namespace Game.Gameplay.Character.Conditions
         public bool IsSatisfied() => _state != null && _state.IsCrouching.Value;
 
 #if UNITY_EDITOR
-        public string DisplayName => "Is Crouching";
+        public string Label => "Is Crouching";
 #endif
     }
 }

@@ -13,7 +13,8 @@ namespace Game.Core.Configuration
         private string _rootKey;
 
         [SerializeReference]
-        [ValueDropdown("GetAllSections")]
+        [ValueDropdown("GetAllSections", DrawDropdownForListElements = false)]
+        [ListDrawerSettings(ListElementLabelName = "Label"), HideReferenceObjectPicker]
         private IConfigSection[] _sections = Array.Empty<IConfigSection>();
 
         public string RootKey => _rootKey;

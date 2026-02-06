@@ -8,7 +8,7 @@ namespace Game.Gameplay.Character.Movement.Configs.Sections
     public struct GravitySection : IConfigSection
     {
         public string Key => "gravity";
-        public string DisplayName => "Character/Gravity";
+        public string Label => "Character/Gravity";
 
         [ConfigKey("multiplier")]
         [SerializeField] private float _multiplier;

@@ -17,7 +17,7 @@ namespace Game.Gameplay.Character.Conditions
         public bool IsSatisfied() => _state != null && _state.IsSprinting.Value;
 
 #if UNITY_EDITOR
-        public string DisplayName => "Is Sprinting";
+        public string Label => "Is Sprinting";
 #endif
     }
 }

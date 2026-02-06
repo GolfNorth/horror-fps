@@ -21,7 +21,7 @@ namespace Game.Gameplay.Character.Conditions
         public bool IsSatisfied() => _resource != null && _resource.CanConsume(_minAmount);
 
 #if UNITY_EDITOR
-        public string DisplayName => $"Has Resource (>= {_minAmount})";
+        public string Label => $"Has Resource (>= {_minAmount})";
 #endif
     }
 }

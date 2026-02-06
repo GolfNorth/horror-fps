@@ -15,9 +15,59 @@ MonoBehaviour:
   _rootKey: player
   _sections:
   - rid: 6440899076987027550
+  - rid: 1229865480590721169
+  - rid: 1229865480590721170
+  - rid: 1229865480590721171
+  - rid: 1229865480590721172
+  - rid: 1229865480590721173
+  - rid: 1229865480590721174
   references:
     version: 2
     RefIds:
+    - rid: 1229865480590721169
+      type: {class: CrouchSection, ns: Game.Gameplay.Character.Movement.Configs.Sections, asm: Game.Gameplay}
+      data:
+        _speed: 2.5
+        _deceleration: 20
+        _heightRatio: 0.5
+    - rid: 1229865480590721170
+      type: {class: GravitySection, ns: Game.Gameplay.Character.Movement.Configs.Sections, asm: Game.Gameplay}
+      data:
+        _multiplier: 2
+        _fallMultiplier: 2.5
+        _maxFallSpeed: 20
+    - rid: 1229865480590721171
+      type: {class: JumpSection, ns: Game.Gameplay.Character.Movement.Configs.Sections, asm: Game.Gameplay}
+      data:
+        _force: 7
+        _coyoteTime: 0.15
+        _bufferTime: 0.1
+    - rid: 1229865480590721172
+      type: {class: LadderSection, ns: Game.Gameplay.Character.Movement.Configs.Sections, asm: Game.Gameplay}
+      data:
+        _climbSpeed: 3
+        _attachDistance: 0.5
+        _detachJumpForce: 5
+        _topExitOffset: 0.5
+        _maxLookYawDeviation: 60
+        _detectionRadius: 1
+        _anchoringDuration: 0.2
+        _edgeThreshold: 0.05
+        _snapStrength: 0.5
+        _topExitHeightOffset: 0.1
+    - rid: 1229865480590721173
+      type: {class: MovementSection, ns: Game.Gameplay.Character.Movement.Configs.Sections, asm: Game.Gameplay}
+      data:
+        _walkSpeed: 5
+        _acceleration: 10
+        _deceleration: 10
+        _airAcceleration: 5
+        _airControl: 0.3
+    - rid: 1229865480590721174
+      type: {class: SprintSection, ns: Game.Gameplay.Character.Movement.Configs.Sections, asm: Game.Gameplay}
+      data:
+        _speed: 8
+        _acceleration: 15
     - rid: 6440899076987027550
       type: {class: LookSection, ns: Game.Gameplay.Player.Configs.Sections, asm: Game.Gameplay}
       data:

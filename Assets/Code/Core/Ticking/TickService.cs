@@ -20,23 +20,33 @@ namespace Game.Core.Ticking
             if (target == null) return;
 
             var priority = target is ITickPriority p ? p.TickPriority : 0;
+            var hasTickLoop = false;
 
             if (target is ITickable tickable)
             {
                 _tickables.Add(new TickEntry<ITickable>(tickable, priority));
                 _tickablesDirty = true;
+                hasTickLoop = true;
             }
 
             if (target is ILateTickable lateTickable)
             {
                 _lateTickables.Add(new TickEntry<ILateTickable>(lateTickable, priority));
                 _lateTickablesDirty = true;
+                hasTickLoop = true;
             }
 
             if (target is IFixedTickable fixedTickable)
             {
                 _fixedTickables.Add(new TickEntry<IFixedTickable>(fixedTickable, priority));
                 _fixedTickablesDirty = true;
+                hasTickLoop = true;
+            }
+
+            if (!hasTickLoop && target is IInitializable initializable)
+            {
+                initializable.Initialize();
+                _initialized.Add(target);
             }
         }
 

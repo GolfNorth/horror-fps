@@ -8,7 +8,7 @@ namespace Game.Gameplay.Character.Movement.Configs.Sections
     public struct LadderSection : IConfigSection
     {
         public string Key => "ladder";
-        public string DisplayName => "Character/Ladder";
+        public string Label => "Character/Ladder";
 
         [ConfigKey("climb_speed")]
         [SerializeField] private float _climbSpeed;

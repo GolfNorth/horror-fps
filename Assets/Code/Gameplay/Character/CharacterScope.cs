@@ -14,31 +14,16 @@ namespace Game.Gameplay.Character
         [Header("Identity")]
         [SerializeField] private string _characterId = "player";
 
-        private CharacterInfo _info;
-        private CharacterContext _context;
-
-        public CharacterInfo Info => _info;
-
-        protected override void Awake()
-        {
-            _info = new CharacterInfo(_characterId);
-            _context = new CharacterContext();
-
-            base.Awake();
-        }
-
         protected override void ConfigureScope(IContainerBuilder builder)
         {
-            builder.RegisterInstance(_info);
-            builder.RegisterInstance(_context);
-
+            builder.RegisterInstance(new CharacterState());
             RegisterScopedConfig(builder);
         }
 
         private void RegisterScopedConfig(IContainerBuilder builder)
         {
             var parentConfig = Parent.Container.Resolve<IConfigService>();
-            var scopedConfig = new ScopedConfigService(parentConfig, _info.Id);
+            var scopedConfig = new ScopedConfigService(parentConfig, _characterId);
             builder.RegisterInstance(scopedConfig).As<IConfigService>();
         }
     }

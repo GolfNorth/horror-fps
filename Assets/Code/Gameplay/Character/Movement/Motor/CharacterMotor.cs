@@ -1,8 +1,8 @@
-using System.Linq;
 using Game.Gameplay.Character.Movement.Abilities;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
+using ZLinq;
 
 namespace Game.Gameplay.Character.Movement.Motor
 {
@@ -33,6 +33,7 @@ namespace Game.Gameplay.Character.Movement.Motor
         private void SortAbilities()
         {
             _abilities = _abilities
+                .AsValueEnumerable()
                 .Where(a => a != null)
                 .OrderByDescending(a => a.Priority)
                 .ToArray();
