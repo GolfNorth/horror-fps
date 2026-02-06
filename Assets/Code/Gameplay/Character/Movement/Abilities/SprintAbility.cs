@@ -1,34 +1,34 @@
 using Game.Core.Configuration;
+using Game.Gameplay.Character.Actions;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
-namespace Game.Gameplay.Character.Abilities
+namespace Game.Gameplay.Character.Movement.Abilities
 {
-    public class SprintAbility : MovementAbility
+    public class SprintAbility : MovementAbility, IInitializable
     {
         public override int Priority => 5;
 
-        [SerializeField] private CharacterIdProvider _idProvider;
-
+        private IActionBuffer _actions;
+        private CharacterState _state;
+        private IConfigService _config;
         private IConfigValue<float> _sprintSpeed;
         private IConfigValue<float> _sprintAcceleration;
 
-        private bool _wantsToSprint;
-
-        public bool IsSprinting => _wantsToSprint;
-
         [Inject]
-        public void Construct(IConfigService config)
+        public void Construct(IConfigService config, IActionBuffer actions, CharacterState state)
         {
-            var id = _idProvider.CharacterId;
-            _sprintSpeed = config.Observe<float>($"{id}.sprint.speed");
-            _sprintAcceleration = config.Observe<float>($"{id}.sprint.acceleration");
+            _config = config;
+            _actions = actions;
+            _state = state;
         }
 
-        public void SetSprintInput(bool sprint)
+        public void Initialize()
         {
-            _wantsToSprint = sprint;
+            _sprintSpeed = _config.Observe<float>("sprint.speed");
+            _sprintAcceleration = _config.Observe<float>("sprint.acceleration");
         }
 
         public override bool UpdateVelocity(
@@ -37,7 +37,11 @@ namespace Game.Gameplay.Character.Abilities
             float deltaTime)
         {
             if (_sprintSpeed == null) return false;
-            if (!_wantsToSprint || !motor.GroundingStatus.IsStableOnGround)
+
+            var wantsToSprint = _actions.Has<SprintAction>();
+            _state.IsSprinting.Value = wantsToSprint && motor.GroundingStatus.IsStableOnGround;
+
+            if (!wantsToSprint || !motor.GroundingStatus.IsStableOnGround)
                 return false;
 
             var horizontal = Vector3.ProjectOnPlane(currentVelocity, motor.CharacterUp);
@@ -52,11 +56,6 @@ namespace Game.Gameplay.Character.Abilities
             currentVelocity = horizontal.normalized * targetSpeed + vertical;
 
             return false;
-        }
-
-        private void Reset()
-        {
-            _idProvider = GetComponentInParent<CharacterIdProvider>();
         }
     }
 }

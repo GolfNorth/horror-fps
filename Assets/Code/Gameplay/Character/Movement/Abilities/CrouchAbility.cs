@@ -1,45 +1,46 @@
 using Game.Core.Configuration;
+using Game.Gameplay.Character.Actions;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
-namespace Game.Gameplay.Character.Abilities
+namespace Game.Gameplay.Character.Movement.Abilities
 {
-    public class CrouchAbility : MovementAbility
+    public class CrouchAbility : MovementAbility, IInitializable
     {
         public override int Priority => 3;
-
-        [SerializeField] private CharacterIdProvider _idProvider;
 
         [Header("Optional")]
         [SerializeField] private Transform _meshRoot;
 
+        private IActionBuffer _actions;
+        private CharacterState _state;
+        private IConfigService _config;
         private IConfigValue<float> _crouchSpeed;
         private IConfigValue<float> _crouchDeceleration;
         private IConfigValue<float> _crouchHeightRatio;
 
         private readonly Collider[] _probedColliders = new Collider[8];
-        private bool _wantsToCrouch;
         private bool _isCrouching;
         private bool _initialized;
 
         private float _standingHeight;
         private float _radius;
 
-        public bool IsCrouching => _isCrouching;
-
         [Inject]
-        public void Construct(IConfigService config)
+        public void Construct(IConfigService config, IActionBuffer actions, CharacterState state)
         {
-            var id = _idProvider.CharacterId;
-            _crouchSpeed = config.Observe<float>($"{id}.crouch.speed");
-            _crouchDeceleration = config.Observe<float>($"{id}.crouch.deceleration");
-            _crouchHeightRatio = config.Observe<float>($"{id}.crouch.height_ratio");
+            _config = config;
+            _actions = actions;
+            _state = state;
         }
 
-        public void SetCrouchInput(bool crouch)
+        public void Initialize()
         {
-            _wantsToCrouch = crouch;
+            _crouchSpeed = _config.Observe<float>("crouch.speed");
+            _crouchDeceleration = _config.Observe<float>("crouch.deceleration");
+            _crouchHeightRatio = _config.Observe<float>("crouch.height_ratio");
         }
 
         public override bool UpdateVelocity(
@@ -51,7 +52,9 @@ namespace Game.Gameplay.Character.Abilities
 
             EnsureInitialized(motor);
 
-            if (_wantsToCrouch && !_isCrouching)
+            var wantsToCrouch = _actions.Has<CrouchAction>();
+
+            if (wantsToCrouch && !_isCrouching)
             {
                 Crouch(motor);
             }
@@ -69,14 +72,17 @@ namespace Game.Gameplay.Character.Abilities
                 }
             }
 
+            _state.IsCrouching.Value = _isCrouching;
+
             return false;
         }
 
         public override void AfterCharacterUpdate(KinematicCharacterMotor motor, float deltaTime)
         {
-            if (_isCrouching && !_wantsToCrouch)
+            if (_isCrouching && !_actions.Has<CrouchAction>())
             {
                 TryUncrouch(motor);
+                _state.IsCrouching.Value = _isCrouching;
             }
         }
 
@@ -126,11 +132,6 @@ namespace Game.Gameplay.Character.Abilities
                     _meshRoot.localScale = scale;
                 }
             }
-        }
-
-        private void Reset()
-        {
-            _idProvider = GetComponentInParent<CharacterIdProvider>();
         }
     }
 }

@@ -1,9 +1,12 @@
 using KinematicCharacterController;
 using UnityEngine;
 
-namespace Game.Gameplay.Character.Abilities
+namespace Game.Gameplay.Character.Movement.Abilities
 {
-    public abstract class MovementAbility : MonoBehaviour
+    /// <summary>
+    /// Base class for movement abilities.
+    /// </summary>
+    public abstract class MovementAbility : MonoBehaviour, IAbility
     {
         public abstract int Priority { get; }
 

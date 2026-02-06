@@ -1,19 +1,28 @@
 using System.Linq;
-using Game.Gameplay.Character.Abilities;
+using Game.Gameplay.Character.Movement.Abilities;
 using KinematicCharacterController;
 using UnityEngine;
+using VContainer;
 
-namespace Game.Gameplay.Character.Motor
+namespace Game.Gameplay.Character.Movement.Motor
 {
     public class CharacterMotor : MonoBehaviour, ICharacterController
     {
         [SerializeField] private KinematicCharacterMotor _motor;
         [SerializeField] private MovementAbility[] _abilities;
 
+        private CharacterState _state;
+
         public KinematicCharacterMotor Motor => _motor;
         public bool IsGrounded => _motor.GroundingStatus.IsStableOnGround;
         public Vector3 Velocity => _motor.Velocity;
         public Vector3 GroundNormal => _motor.GroundingStatus.GroundNormal;
+
+        [Inject]
+        public void Construct(CharacterState state)
+        {
+            _state = state;
+        }
 
         private void Awake()
         {
@@ -61,6 +70,12 @@ namespace Game.Gameplay.Character.Motor
                 {
                     ability.AfterCharacterUpdate(_motor, deltaTime);
                 }
+            }
+
+            if (_state != null)
+            {
+                _state.IsGrounded.Value = _motor.GroundingStatus.IsStableOnGround;
+                _state.Velocity.Value = _motor.Velocity;
             }
         }
 

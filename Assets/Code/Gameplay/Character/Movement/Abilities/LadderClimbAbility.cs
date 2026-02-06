@@ -1,12 +1,14 @@
 using Game.Core.Configuration;
+using Game.Gameplay.Character.Actions;
 using Game.Gameplay.Environment;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
-namespace Game.Gameplay.Character.Abilities
+namespace Game.Gameplay.Character.Movement.Abilities
 {
-    public class LadderClimbAbility : MovementAbility
+    public class LadderClimbAbility : MovementAbility, IInitializable
     {
         private enum ClimbingState
         {
@@ -18,9 +20,10 @@ namespace Game.Gameplay.Character.Abilities
 
         public override int Priority => 50;
 
-        [SerializeField] private CharacterIdProvider _idProvider;
         [SerializeField] private LayerMask _ladderLayer;
 
+        private IActionBuffer _actions;
+        private IConfigService _config;
         private IConfigValue<float> _climbSpeed;
         private IConfigValue<float> _attachDistance;
         private IConfigValue<float> _detachJumpForce;
@@ -32,8 +35,6 @@ namespace Game.Gameplay.Character.Abilities
         private IConfigValue<float> _topExitHeightOffset;
 
         private Ladder _currentLadder;
-        private float _climbInput;
-        private bool _wantsToJumpOff;
         private ClimbingState _climbingState;
         private bool _wasActive;
 
@@ -48,57 +49,28 @@ namespace Game.Gameplay.Character.Abilities
 
         public Ladder CurrentLadder => _currentLadder;
 
-        /// <summary>
-        /// Returns the yaw angle the player should face when climbing (toward the ladder).
-        /// </summary>
         public float LadderFacingYaw => _currentLadder != null
             ? Quaternion.LookRotation(_currentLadder.Forward).eulerAngles.y
             : 0f;
 
         [Inject]
-        public void Construct(IConfigService config)
+        public void Construct(IConfigService config, IActionBuffer actions)
         {
-            var id = _idProvider.CharacterId;
-            _climbSpeed = config.Observe<float>($"{id}.ladder.climb_speed");
-            _attachDistance = config.Observe<float>($"{id}.ladder.attach_distance");
-            _detachJumpForce = config.Observe<float>($"{id}.ladder.detach_jump_force");
-            _topExitOffset = config.Observe<float>($"{id}.ladder.top_exit_offset");
-            _detectionRadius = config.Observe<float>($"{id}.ladder.detection_radius");
-            _anchoringDuration = config.Observe<float>($"{id}.ladder.anchoring_duration");
-            _edgeThreshold = config.Observe<float>($"{id}.ladder.edge_threshold");
-            _snapStrength = config.Observe<float>($"{id}.ladder.snap_strength");
-            _topExitHeightOffset = config.Observe<float>($"{id}.ladder.top_exit_height_offset");
+            _config = config;
+            _actions = actions;
         }
 
-        public void SetClimbInput(float input)
+        public void Initialize()
         {
-            _climbInput = Mathf.Clamp(input, -1f, 1f);
-        }
-
-        public void RequestAttach()
-        {
-            if (_climbingState != ClimbingState.None) return;
-
-            var ladder = FindNearestLadder(transform.position);
-            if (ladder != null)
-            {
-                AttachToLadder(ladder);
-            }
-        }
-
-        public void RequestDetach(bool withJump = false)
-        {
-            if (_climbingState == ClimbingState.None) return;
-
-            if (withJump)
-            {
-                _wantsToJumpOff = true;
-            }
-            else if (_climbingState == ClimbingState.Climbing)
-            {
-                _climbingState = ClimbingState.None;
-                _currentLadder = null;
-                            }
+            _climbSpeed = _config.Observe<float>("ladder.climb_speed");
+            _attachDistance = _config.Observe<float>("ladder.attach_distance");
+            _detachJumpForce = _config.Observe<float>("ladder.detach_jump_force");
+            _topExitOffset = _config.Observe<float>("ladder.top_exit_offset");
+            _detectionRadius = _config.Observe<float>("ladder.detection_radius");
+            _anchoringDuration = _config.Observe<float>("ladder.anchoring_duration");
+            _edgeThreshold = _config.Observe<float>("ladder.edge_threshold");
+            _snapStrength = _config.Observe<float>("ladder.snap_strength");
+            _topExitHeightOffset = _config.Observe<float>("ladder.top_exit_height_offset");
         }
 
         public override bool UpdateVelocity(
@@ -107,6 +79,16 @@ namespace Game.Gameplay.Character.Abilities
             float deltaTime)
         {
             if (_climbSpeed == null) return false;
+
+            // Try to attach when not climbing and interact action is present
+            if (_climbingState == ClimbingState.None && _actions.Has<InteractAction>())
+            {
+                var ladder = FindNearestLadder(transform.position);
+                if (ladder != null)
+                {
+                    AttachToLadder(ladder);
+                }
+            }
 
             var isActive = _climbingState != ClimbingState.None;
 
@@ -134,16 +116,22 @@ namespace Game.Gameplay.Character.Abilities
                 return false;
             }
 
-            // Handle jump off request
-            if (_wantsToJumpOff)
+            // Jump off ladder
+            if (_actions.Has<JumpAction>())
             {
-                _wantsToJumpOff = false;
                 var jumpDir = (-_currentLadder.Forward + Vector3.up).normalized;
                 currentVelocity = jumpDir * _detachJumpForce.Value;
                 _climbingState = ClimbingState.None;
                 _currentLadder = null;
-                                motor.ForceUnground();
+                motor.ForceUnground();
                 return true;
+            }
+
+            // Read climb input from move action Y axis
+            var climbInput = 0f;
+            if (_actions.TryGet<MoveAction>(out var move))
+            {
+                climbInput = Mathf.Clamp(move.Direction.y, -1f, 1f);
             }
 
             switch (_climbingState)
@@ -153,7 +141,7 @@ namespace Game.Gameplay.Character.Abilities
                     break;
 
                 case ClimbingState.Climbing:
-                    currentVelocity = UpdateClimbing(motor, deltaTime);
+                    currentVelocity = UpdateClimbing(motor, climbInput, deltaTime);
                     break;
 
                 case ClimbingState.DeAnchoring:
@@ -164,7 +152,6 @@ namespace Game.Gameplay.Character.Abilities
             motor.ForceUnground();
             return true;
         }
-
 
         private Vector3 UpdateAnchoring(KinematicCharacterMotor motor, float deltaTime)
         {
@@ -182,28 +169,25 @@ namespace Game.Gameplay.Character.Abilities
             return velocity;
         }
 
-        private Vector3 UpdateClimbing(KinematicCharacterMotor motor, float deltaTime)
+        private Vector3 UpdateClimbing(KinematicCharacterMotor motor, float climbInput, float deltaTime)
         {
-            // Check exit conditions
             var position = motor.TransientPosition;
 
-            if (_currentLadder.IsAtTop(position, _edgeThreshold.Value) && _climbInput > 0f)
+            if (_currentLadder.IsAtTop(position, _edgeThreshold.Value) && climbInput > 0f)
             {
                 StartDeAnchoringToTop();
                 return Vector3.zero;
             }
 
-            if (_currentLadder.IsAtBottom(position, _edgeThreshold.Value) && _climbInput < 0f)
+            if (_currentLadder.IsAtBottom(position, _edgeThreshold.Value) && climbInput < 0f)
             {
                 _climbingState = ClimbingState.None;
                 _currentLadder = null;
-                                return Vector3.zero;
+                return Vector3.zero;
             }
 
-            // Climb movement
-            var climbVelocity = _currentLadder.transform.up * (_climbInput * _climbSpeed.Value);
+            var climbVelocity = _currentLadder.transform.up * (climbInput * _climbSpeed.Value);
 
-            // Snap to ladder center
             var targetPosition = _currentLadder.GetClosestPointOnLadder(motor.TransientPosition);
             var ladderOffset = -_currentLadder.Forward * _attachDistance.Value;
             targetPosition += ladderOffset;
@@ -235,9 +219,7 @@ namespace Game.Gameplay.Character.Abilities
         private void AttachToLadder(Ladder ladder)
         {
             _currentLadder = ladder;
-            _climbInput = 0f;
 
-            // Calculate target position on ladder
             var targetPos = ladder.GetClosestPointOnLadder(transform.position);
             targetPos += -ladder.Forward * _attachDistance.Value;
 
@@ -294,7 +276,6 @@ namespace Game.Gameplay.Character.Abilities
 
         private void Reset()
         {
-            _idProvider = GetComponentInParent<CharacterIdProvider>();
             _ladderLayer = LayerMask.GetMask("Ladder");
         }
     }

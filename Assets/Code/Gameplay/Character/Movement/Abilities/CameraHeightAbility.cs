@@ -3,7 +3,7 @@ using KinematicCharacterController;
 using UnityEngine;
 using VContainer.Unity;
 
-namespace Game.Gameplay.Character.Abilities
+namespace Game.Gameplay.Character.Movement.Abilities
 {
     public class CameraHeightAbility : TickableBehaviour, ILateTickable
     {

@@ -2,7 +2,7 @@ using System;
 using Game.Core.Configuration;
 using UnityEngine;
 
-namespace Game.Gameplay.Character.Configs.Sections
+namespace Game.Gameplay.Character.Movement.Configs.Sections
 {
     [Serializable]
     public struct JumpSection : IConfigSection

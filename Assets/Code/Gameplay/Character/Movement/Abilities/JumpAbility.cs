@@ -1,40 +1,38 @@
 using Game.Core.Configuration;
+using Game.Gameplay.Character.Actions;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
-namespace Game.Gameplay.Character.Abilities
+namespace Game.Gameplay.Character.Movement.Abilities
 {
-    public class JumpAbility : MovementAbility
+    public class JumpAbility : MovementAbility, IInitializable
     {
         public override int Priority => 30;
 
-        [SerializeField] private CharacterIdProvider _idProvider;
-
+        private IActionBuffer _actions;
+        private IConfigService _config;
         private IConfigValue<float> _jumpForce;
         private IConfigValue<float> _coyoteTime;
         private IConfigValue<float> _bufferTime;
 
-        private bool _jumpRequested;
         private bool _jumpConsumed;
         private float _timeSinceJumpRequested = float.MaxValue;
         private float _timeSinceLastGrounded = float.MaxValue;
 
-        public bool CanJump => _jumpForce != null && !_jumpConsumed && _timeSinceLastGrounded <= _coyoteTime.Value;
-
         [Inject]
-        public void Construct(IConfigService config)
+        public void Construct(IConfigService config, IActionBuffer actions)
         {
-            var id = _idProvider.CharacterId;
-            _jumpForce = config.Observe<float>($"{id}.jump.force");
-            _coyoteTime = config.Observe<float>($"{id}.jump.coyote_time");
-            _bufferTime = config.Observe<float>($"{id}.jump.buffer_time");
+            _config = config;
+            _actions = actions;
         }
 
-        public void Request()
+        public void Initialize()
         {
-            _jumpRequested = true;
-            _timeSinceJumpRequested = 0f;
+            _jumpForce = _config.Observe<float>("jump.force");
+            _coyoteTime = _config.Observe<float>("jump.coyote_time");
+            _bufferTime = _config.Observe<float>("jump.buffer_time");
         }
 
         public override bool UpdateVelocity(
@@ -43,6 +41,9 @@ namespace Game.Gameplay.Character.Abilities
             float deltaTime)
         {
             if (_jumpForce == null) return false;
+
+            if (_actions.Has<JumpAction>())
+                _timeSinceJumpRequested = 0f;
 
             _timeSinceJumpRequested += deltaTime;
             _timeSinceLastGrounded += deltaTime;
@@ -79,13 +80,7 @@ namespace Game.Gameplay.Character.Abilities
             currentVelocity += jumpDirection * _jumpForce.Value
                 - Vector3.Project(currentVelocity, motor.CharacterUp);
 
-            _jumpRequested = false;
             _jumpConsumed = true;
-        }
-
-        private void Reset()
-        {
-            _idProvider = GetComponentInParent<CharacterIdProvider>();
         }
     }
 }

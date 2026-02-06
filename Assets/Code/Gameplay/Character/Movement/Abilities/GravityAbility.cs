@@ -2,15 +2,15 @@ using Game.Core.Configuration;
 using KinematicCharacterController;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
-namespace Game.Gameplay.Character.Abilities
+namespace Game.Gameplay.Character.Movement.Abilities
 {
-    public class GravityAbility : MovementAbility
+    public class GravityAbility : MovementAbility, IInitializable
     {
         public override int Priority => 0;
 
-        [SerializeField] private CharacterIdProvider _idProvider;
-
+        private IConfigService _config;
         private IConfigValue<float> _gravityMultiplier;
         private IConfigValue<float> _fallMultiplier;
         private IConfigValue<float> _maxFallSpeed;
@@ -18,10 +18,14 @@ namespace Game.Gameplay.Character.Abilities
         [Inject]
         public void Construct(IConfigService config)
         {
-            var id = _idProvider.CharacterId;
-            _gravityMultiplier = config.Observe<float>($"{id}.gravity.multiplier");
-            _fallMultiplier = config.Observe<float>($"{id}.gravity.fall_multiplier");
-            _maxFallSpeed = config.Observe<float>($"{id}.gravity.max_fall_speed");
+            _config = config;
+        }
+
+        public void Initialize()
+        {
+            _gravityMultiplier = _config.Observe<float>("gravity.multiplier");
+            _fallMultiplier = _config.Observe<float>("gravity.fall_multiplier");
+            _maxFallSpeed = _config.Observe<float>("gravity.max_fall_speed");
         }
 
         public override bool UpdateVelocity(
@@ -43,11 +47,6 @@ namespace Game.Gameplay.Character.Abilities
             }
 
             return false;
-        }
-
-        private void Reset()
-        {
-            _idProvider = GetComponentInParent<CharacterIdProvider>();
         }
     }
 }
