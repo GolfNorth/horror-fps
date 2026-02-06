@@ -1,6 +1,6 @@
 using System;
 using Game.Core.Logging;
-using Game.Gameplay.Player.Input.Intents;
+using Game.Gameplay.Character.Intents;
 using Game.Input;
 using UnityEngine;
 using VContainer;

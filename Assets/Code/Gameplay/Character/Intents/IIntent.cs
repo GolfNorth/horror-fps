@@ -1,4 +1,4 @@
-namespace Game.Gameplay.Player.Input.Intents
+namespace Game.Gameplay.Character.Intents
 {
     /// <summary>
     /// Marker interface for player intents.

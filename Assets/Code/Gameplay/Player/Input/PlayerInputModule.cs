@@ -1,4 +1,5 @@
 using Game.Core.Modules;
+using Game.Gameplay.Character.Intents;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;

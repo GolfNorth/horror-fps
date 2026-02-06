@@ -1,5 +1,5 @@
 using Game.Gameplay.Character.Actions;
-using Game.Gameplay.Player.Input;
+using Game.Gameplay.Character.Intents;
 
 namespace Game.Gameplay.Character
 {

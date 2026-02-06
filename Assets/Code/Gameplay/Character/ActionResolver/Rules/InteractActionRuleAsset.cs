@@ -1,6 +1,6 @@
 using Game.Core.Conditions;
 using Game.Gameplay.Character.Actions;
-using Game.Gameplay.Player.Input.Intents;
+using Game.Gameplay.Character.Intents;
 using UnityEngine;
 
 namespace Game.Gameplay.Character.Rules

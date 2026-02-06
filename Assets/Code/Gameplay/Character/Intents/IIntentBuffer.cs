@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Game.Gameplay.Player.Input.Intents;
 
-namespace Game.Gameplay.Player.Input
+namespace Game.Gameplay.Character.Intents
 {
     /// <summary>
     /// Buffer for player intents.
